@@ -24,7 +24,7 @@ abstract class TuiAppStateHolder<S extends TuiState> {
   /// Shared state that can be mutated.
   S get state;
 
-  /// The currently mounted widget state, if not null;
+  /// The currently mounted widget state, if not null.
   /// This is used to trigger rebuilds.
   TuiAppState? get widgetState;
 

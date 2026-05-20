@@ -2,7 +2,7 @@ import 'package:serverpod_tui/src/form/config.dart';
 import 'package:serverpod_tui/src/form/config_option.dart';
 import 'package:serverpod_tui/src/form/requirement.dart';
 
-/// State for a [Form] component.
+/// State for a `Form` component.
 class FormState<F extends FormConfig> {
   FormState(this._configValues) {
     _updateState();
@@ -48,7 +48,7 @@ class FormState<F extends FormConfig> {
     _maxFocusedConfigIndex = configurations.length - 1;
   }
 
-  /// Updates the focused [FormConfig].
+  /// Updates the focused [FormConfig] by [delta].
   void updateFocusedConfig(int delta) {
     _focusedConfigIndex += delta;
     if (_focusedConfigIndex > maxFocusedConfigIndex) {
@@ -58,7 +58,7 @@ class FormState<F extends FormConfig> {
     }
   }
 
-  /// Updates the focused [FormConfigOption] for the focused [FormConfig].
+  /// Updates the focused [FormConfigOption] for the focused [FormConfig] by [delta].
   void updateFocusedConfigOption(int delta) {
     final config = configurations[_focusedConfigIndex];
     final configState = _focusedOptionState[config];
@@ -153,14 +153,13 @@ class FormState<F extends FormConfig> {
   }
 
   /// Returns all selected [FormConfigOption]s for [config].
-  /// Only applicable for multi-select configs.
   Set<T>? getSelectedOptionsFor<T extends FormConfigOption>(
     FormConfig<T> config,
   ) {
     return _selectionState[config]?.cast<T>();
   }
 
-  /// Returns true if [option] is the selected option for [config].
+  /// Returns true if [option] is a selected option for [config].
   bool isOptionSelectedForConfig<T extends FormConfigOption>(
     FormConfig<T> config,
     T option,

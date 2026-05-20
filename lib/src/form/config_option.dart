@@ -1,4 +1,4 @@
-/// A [FormConfig] option.
+/// A form configuration option.
 abstract class FormConfigOption {
   /// UI visible label for this option.
   String get label;
