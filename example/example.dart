@@ -1,3 +1,5 @@
+import 'package:serverpod_tui/nocterm_components.dart';
+
 import 'screens/loading_screen.dart';
 import 'screens/main_screen.dart';
 import 'package:nocterm/nocterm.dart';
@@ -5,7 +7,7 @@ import 'package:nocterm/nocterm.dart';
 enum Screen { loading, main }
 
 void main() {
-  runApp(const Counter());
+  runTuiApp(const Counter());
 }
 
 class Counter extends StatefulComponent {

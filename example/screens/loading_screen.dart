@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:nocterm/nocterm.dart';
+import 'package:serverpod_tui/nocterm_components.dart';
 
 class LoadingScreen extends StatefulComponent {
   @override
@@ -34,11 +35,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          AsciiText(
-            'Serverpod',
-            font: AsciiFont.standard,
-            style: TextStyle(color: Colors.blue),
-          ),
+          Logo(text: 'Serverpod'),
           Padding(
             padding: EdgeInsets.only(top: 3, bottom: 1),
             child: Center(

@@ -1,2 +1,5 @@
-A sample command-line application with an entrypoint in `bin/`, library code
-in `lib/`, and example unit test in `test/`.
+![Serverpod banner](https://github.com/serverpod/serverpod/raw/main/misc/images/github-header.webp)
+
+# Serverpod TUI
+
+This package contains tools for building terminal user interfaces.
