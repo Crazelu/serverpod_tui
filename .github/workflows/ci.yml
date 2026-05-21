@@ -7,6 +7,9 @@ on:
 jobs:
   format:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dart: [3.11]
 
     steps:
       - name: Check out repository
@@ -23,6 +26,9 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dart: [3.11]
 
     steps:
       - name: Check out repository
