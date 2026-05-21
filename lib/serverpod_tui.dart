@@ -1,5 +1,6 @@
 export 'components.dart';
 export 'form.dart';
+export 'log.dart';
 export 'src/app_state_holder.dart';
 export 'src/app.dart';
 export 'src/bounded_queue_list.dart';
@@ -9,5 +10,5 @@ export 'src/serverpod_theme.dart';
 export 'src/state.dart';
 export 'src/strip_ansi.dart';
 export 'src/terminal_backend.dart';
-export 'src/tui_log_sink.dart';
-export 'src/tui_log_writer.dart';
+export 'src/log/tui_log_sink.dart';
+export 'src/log/tui_log_writer.dart';
