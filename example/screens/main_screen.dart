@@ -1,11 +1,17 @@
-import 'package:nocterm_components/components/bordered_box.dart';
-import 'package:nocterm_components/components/button.dart';
-import 'package:nocterm_components/components/log_event.dart';
-import 'package:nocterm_components/components/log_message.dart';
-import 'package:nocterm_components/components/tab_bar.dart';
+import 'package:intl/intl.dart';
 import 'package:nocterm/nocterm.dart';
+import 'package:serverpod_tui/serverpod_tui.dart';
 
-class MainScreen extends StatelessComponent {
+class MainScreen extends StatefulComponent {
+  @override
+  State<StatefulComponent> createState() {
+    return _MainScreenState();
+  }
+}
+
+class _MainScreenState extends State<MainScreen> {
+  int _selectedTab = 0;
+
   @override
   Component build(BuildContext context) {
     return Column(
@@ -18,7 +24,13 @@ class MainScreen extends StatelessComponent {
               crossAxisAlignment: .stretch,
               mainAxisSize: .max,
               children: [
-                TabBar(labels: ['Log Messages'], selectedTab: 0),
+                TabBar(
+                  labels: ['Logs'],
+                  selectedTab: _selectedTab,
+                  onTabChanged: (index) {
+                    setState(() => _selectedTab = index);
+                  },
+                ),
                 Expanded(
                   child: ListView(
                     children: [
@@ -63,41 +75,98 @@ class MainScreen extends StatelessComponent {
             ),
           ),
         ),
-        Row(
-          children: [
-            SizedBox(width: 1),
+        ButtonBar(
+          buttons: [
             Button(
               name: 'Hot Reload',
               activationChar: 'R',
-              activationKey: .keyR,
-              onActivate: () {},
+              activationKeys: const [.keyR],
+              onActivate: (_) {},
             ),
-            SizedBox(width: 3),
             Button(
               name: 'Create Migration',
               activationChar: 'M',
-              activationKey: .keyM,
-              onActivate: () {},
+              activationKeys: const [.keyM],
+              onActivate: (_) {},
             ),
-            SizedBox(width: 2),
             Button(
               name: 'Apply Migration',
               activationChar: 'A',
-              activationKey: .keyA,
-              onActivate: () {},
+              activationKeys: const [.keyA],
+              onActivate: (_) {},
             ),
-            SizedBox(width: 2),
             Button(
               name: 'Quit',
               activationChar: 'Q',
-              activationKey: .keyQ,
-              onActivate: () {
-                shutdownApp(0);
+              activationKeys: const [.keyQ],
+              onActivate: (_) {
+                shutdownTuiApp(0);
               },
             ),
-            Spacer(),
           ],
         ),
+      ],
+    );
+  }
+}
+
+enum LogLevel {
+  debug('debug', Colors.gray),
+  info('info ', Colors.blue),
+  warning('warn ', Colors.yellow),
+  error('error', Colors.red),
+  fatal('fatal', Colors.brightRed)
+  ;
+
+  const LogLevel(this.label, this.color);
+  final String label;
+  final Color color;
+}
+
+class LogMessage extends StatelessComponent {
+  static final _timeFormat = DateFormat('HH:mm:ss');
+
+  final DateTime timestamp;
+  final LogLevel logLevel;
+  final String message;
+
+  LogMessage({
+    required this.timestamp,
+    required this.logLevel,
+    required this.message,
+  });
+
+  @override
+  Component build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: .start,
+      mainAxisAlignment: .start,
+      mainAxisSize: .max,
+      children: [
+        Text(logLevel.label, style: TextStyle(color: logLevel.color)),
+        SizedBox(width: 1),
+        Text(
+          _timeFormat.format(timestamp.toLocal()),
+          style: TextStyle(fontWeight: .dim),
+        ),
+        SizedBox(width: 1),
+        Expanded(child: Text(message)),
+      ],
+    );
+  }
+}
+
+class LogDivider extends StatelessComponent {
+  final String label;
+
+  LogDivider({super.key, required this.label});
+
+  @override
+  Component build(BuildContext context) {
+    return Stack(
+      children: [
+        Divider(),
+        Center(child: Text(' $label ')),
       ],
     );
   }
