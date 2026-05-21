@@ -10,7 +10,7 @@ abstract class TuiState {
   BoundedQueueList<String> get rawLines => BoundedQueueList(0);
 
   /// Currently active tracked operations (keyed by ID).
-  Map<String, TrackedOperation> get activeOperations => {};
+  Map<String, TrackedOperation> get activeOperations;
 }
 
 /// A tracked operation (server session or CLI progress).
