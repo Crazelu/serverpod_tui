@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 import 'package:nocterm/nocterm.dart';
-import 'package:serverpod_tui/nocterm_components.dart';
+import 'package:serverpod_tui/serverpod_tui.dart';
 
 class MainScreen extends StatefulComponent {
   @override

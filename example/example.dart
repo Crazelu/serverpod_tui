@@ -1,4 +1,4 @@
-import 'package:serverpod_tui/nocterm_components.dart';
+import 'package:serverpod_tui/serverpod_tui.dart';
 
 import 'screens/loading_screen.dart';
 import 'screens/main_screen.dart';
