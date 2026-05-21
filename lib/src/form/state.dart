@@ -1,24 +1,30 @@
+import 'package:nocterm/nocterm.dart';
 import 'package:serverpod_tui/src/form/config.dart';
 import 'package:serverpod_tui/src/form/config_option.dart';
 import 'package:serverpod_tui/src/form/requirement.dart';
 
 /// State for a `Form` component.
-class FormState<F extends FormConfig> {
+/// This manages states for text input, focus
+/// and selection (single and multi).
+class FormState {
   FormState(this._configValues) {
     _updateState();
   }
 
   /// Configurations used to initialize this state.
-  final List<F> _configValues;
+  final List<FormConfig> _configValues;
 
   /// Mutable configurations which gets updated with this state.
-  final List<F> configurations = [];
+  final List<FormConfig> configurations = [];
 
-  /// Tracked state for selected [FormConfigOption]s per [FormConfig].
-  final Map<F, Set<FormConfigOption>> _selectionState = {};
+  /// Tracked state for focused [FormConfigOption] per [FormSelectionConfig].
+  final Map<FormSelectionConfig, _FormConfigState> _focusedOptionState = {};
 
-  /// Tracked state for focused [FormConfigOption] per [FormConfig].
-  final Map<F, _FormConfigState> _focusedOptionState = {};
+  /// Tracked state for selected [FormConfigOption]s per [FormSelectionConfig].
+  final Map<FormSelectionConfig, Set<FormConfigOption>> _selectionState = {};
+
+  /// Tracked input state per [FormInputConfig].
+  final Map<FormInputConfig, TextEditingController> _inputState = {};
 
   int _maxFocusedConfigIndex = 0;
 
@@ -36,13 +42,19 @@ class FormState<F extends FormConfig> {
     configurations.clear();
     for (final config in _configValues) {
       if (_isConfigConstrained(config)) {
+        _inputState.remove(config);
         _selectionState.remove(config);
         _focusedOptionState.remove(config);
         continue;
       }
+
       configurations.add(config);
-      _selectionState[config] ??= config.defaultOptions;
-      _focusedOptionState[config] ??= _FormConfigState(config);
+      if (config is FormSelectionConfig) {
+        _selectionState[config] ??= config.defaultOptions;
+        _focusedOptionState[config] ??= _FormConfigState(config);
+      } else if (config is FormInputConfig) {
+        _inputState[config] ??= TextEditingController();
+      }
     }
 
     _maxFocusedConfigIndex = configurations.length - 1;
@@ -65,7 +77,10 @@ class FormState<F extends FormConfig> {
     configState?._updateFocusedOption(delta);
   }
 
-  void _updateOptionFor(F config, FormConfigOption option) {
+  void _updateSelectedOption(
+    FormSelectionConfig config,
+    FormConfigOption option,
+  ) {
     if (config.multiSelect) {
       final selections = _selectionState[config];
       if (selections != null && selections.contains(option)) {
@@ -78,9 +93,10 @@ class FormState<F extends FormConfig> {
     }
   }
 
-  /// Updates the selected [FormConfigOption] for the focused [FormConfig].
+  /// Updates the selected [FormSelectionConfig] for the focused [FormConfig].
   void selectConfigOption() {
     final config = configurations[_focusedConfigIndex];
+    if (config is! FormSelectionConfig) return;
     final configState = _focusedOptionState[config];
     if (configState == null) return;
 
@@ -96,51 +112,46 @@ class FormState<F extends FormConfig> {
 
     final focusedOptionIndex = configState.focusedOptionIndex;
     final newOption = config.options[focusedOptionIndex];
-    _updateOptionFor(config, newOption);
-    _evaluateRequirements();
+    _updateSelectedOption(config, newOption);
     _updateState();
   }
 
-  void updateSelectedOption(F config, FormConfigOption option) {
-    _updateOptionFor(config, option);
+  /// Requests for [config] to be in focus.
+  void requestFocus(FormConfig config) {
+    _focusedConfigIndex = configurations.indexOf(config);
+  }
+
+  /// Sets [option] as a selected value for [config].
+  void updateSelectedOption(
+    FormSelectionConfig config,
+    FormConfigOption option,
+  ) {
+    _updateSelectedOption(config, option);
     _focusedConfigIndex = configurations.indexOf(config);
     final configState = _focusedOptionState[config];
     configState?._focusedOptionIndex = config.options.indexOf(option);
-    _evaluateRequirements();
     _updateState();
   }
 
-  /// Evaluates requirements defined for each [FormConfig].
-  void _evaluateRequirements() {
-    for (final config in configurations) {
-      if (config.requirements.isEmpty) continue;
-      for (final req in config.requirements) {
-        final selectedOption = getSelectedOptionFor(req.requiredConfig);
-        if (selectedOption != req.requiredConfigOption) {
-          _selectionState[config] = {req.disabledOption};
-          final configState = _focusedOptionState[config];
-          // Update the focused option index to keep UI interaction in sync
-          configState?._focusedOptionIndex = config.options.indexOf(
-            req.disabledOption,
-          );
-        }
-      }
-    }
+  /// Updates the input text for [config] with [text].
+  void updateInput(FormInputConfig config, String text) {
+    final controller = _inputState[config];
+    controller?.text = text;
   }
 
   /// True when [config] is partially locked because at least one requirement
   /// on another config is not satisfied.
-  bool _isConfigConstrained(F config) {
+  bool _isConfigConstrained(FormConfig config) {
     return config.requirements.any(_isRequirementUnsatisfied);
   }
 
   /// True when [req] is not satisfied given current selections.
   bool _isRequirementUnsatisfied(FormRequirement req) {
-    return getSelectedOptionFor(req.requiredConfig) != req.requiredConfigOption;
+    return getSelectedOptionFor(req.config) != req.configOption;
   }
 
   /// Returns the focused option for [config].
-  int? getFocusedOptionIndexFor(F config) {
+  int? getFocusedOptionIndexFor(FormConfig config) {
     final state = _focusedOptionState[config];
     return state?._focusedOptionIndex;
   }
@@ -159,6 +170,16 @@ class FormState<F extends FormConfig> {
     return _selectionState[config]?.cast<T>();
   }
 
+  /// Returns the current input text for [config], if any.
+  String? getInputFor(FormInputConfig config) {
+    return getInputControllerFor(config)?.text;
+  }
+
+  /// Returns the [TextEditingController] for [config], if any.
+  TextEditingController? getInputControllerFor(FormInputConfig config) {
+    return _inputState[config];
+  }
+
   /// Returns true if [option] is a selected option for [config].
   bool isOptionSelectedForConfig<T extends FormConfigOption>(
     FormConfig<T> config,
@@ -170,7 +191,7 @@ class FormState<F extends FormConfig> {
 }
 
 /// Internal state tracking the focused option for a [FormConfig].
-class _FormConfigState<T extends FormConfig> {
+class _FormConfigState<T extends FormSelectionConfig> {
   _FormConfigState(this.config) : _maxIndex = config.options.length - 1;
 
   final T config;

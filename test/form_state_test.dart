@@ -4,21 +4,44 @@ import 'package:serverpod_tui/src/form/requirement.dart';
 import 'package:serverpod_tui/src/form/state.dart';
 import 'package:test/test.dart';
 
-enum TestConfig<T extends FormConfigOption> implements FormConfig<T> {
+enum InputConfig<T extends FormConfigOption> implements FormInputConfig {
+  projectId(label: 'Project ID')
+  ;
+
+  const InputConfig({
+    required this.label,
+    this.maxLines = 1,
+    this.width = 10,
+    this.requirements = const [],
+  });
+
+  @override
+  final String label;
+
+  @override
+  final int maxLines;
+
+  @override
+  final double width;
+
+  @override
+  final List<FormRequirement> requirements;
+}
+
+enum TestConfig<T extends FormConfigOption> implements FormSelectionConfig<T> {
   database<DatabaseConfigOption>(
     label: 'Database',
     options: DatabaseConfigOption.values,
     defaultOptions: {DatabaseConfigOption.postgres},
   ),
   auth<BoolFormConfigOption>(
-    label: 'Authentication (requires Postgres)',
+    label: 'Authentication',
     options: BoolFormConfigOption.values,
     defaultOptions: {BoolFormConfigOption.enabled},
     requirements: [
       FormRequirement(
-        requiredConfig: TestConfig.database,
-        requiredConfigOption: DatabaseConfigOption.postgres,
-        disabledOption: BoolFormConfigOption.disabled,
+        config: TestConfig.database,
+        configOption: DatabaseConfigOption.postgres,
       ),
     ],
   ),
@@ -48,13 +71,12 @@ enum TestConfig<T extends FormConfigOption> implements FormConfig<T> {
   final Set<T> defaultOptions;
 
   @override
-  final List<FormRequirement<FormConfigOption, T>> requirements;
+  final List<FormRequirement> requirements;
 
   @override
   final bool multiSelect;
 }
 
-/// [FormConfigOption] for supported databases.
 enum DatabaseConfigOption implements FormConfigOption {
   postgres('Postgres'),
   sqlite('SQLite'),
@@ -85,9 +107,13 @@ enum IdeOption implements FormConfigOption {
 void main() {
   group('Given a FormState', () {
     late FormState state;
+    final configurations = <FormConfig>[
+      ...TestConfig.values,
+      ...InputConfig.values,
+    ];
 
     setUp(() {
-      state = FormState(TestConfig.values);
+      state = FormState(configurations);
     });
 
     test('when created then defaults are correct', () {
@@ -117,6 +143,16 @@ void main() {
         ]),
       );
     });
+
+    test(
+      'when requesting focus for a config, '
+      'then the focused config index is set correctly',
+      () {
+        expect(state.focusedConfigIndex, 0);
+        state.requestFocus(TestConfig.ide);
+        expect(state.focusedConfigIndex, 2);
+      },
+    );
 
     test(
       'when updating the focused config with positive delta, '
@@ -160,11 +196,13 @@ void main() {
     );
 
     group('when selecting focused config option with positive delta', () {
-      late FormConfig config;
+      late FormSelectionConfig config;
       int initialFocusedOptionIndex = 0;
 
       setUp(() {
-        config = state.configurations[state.focusedConfigIndex];
+        config =
+            state.configurations[state.focusedConfigIndex]
+                as FormSelectionConfig;
         initialFocusedOptionIndex = state.getFocusedOptionIndexFor(config) ?? 0;
 
         state.updateFocusedConfigOption(1);
@@ -187,7 +225,9 @@ void main() {
         'and the current focused config option index is the max, '
         'then the focused config option index wraps to 0',
         () {
-          final config = state.configurations[state.focusedConfigIndex];
+          final config =
+              state.configurations[state.focusedConfigIndex]
+                  as FormSelectionConfig;
           final optionsCount = config.options.length - 1;
 
           for (var i = 0; i < optionsCount; i++) {
@@ -202,11 +242,13 @@ void main() {
     });
 
     group('when selecting focused config option with negative delta', () {
-      late FormConfig config;
+      late FormSelectionConfig config;
       int indexAfterPositive = 0;
 
       setUp(() {
-        config = state.configurations[state.focusedConfigIndex];
+        config =
+            state.configurations[state.focusedConfigIndex]
+                as FormSelectionConfig;
         state.updateFocusedConfigOption(1);
         state.selectConfigOption();
         indexAfterPositive = state.getFocusedOptionIndexFor(config) ?? 0;
@@ -227,7 +269,9 @@ void main() {
         'and the current focused config option index is 0, '
         'then the focused config option index wraps to the max config option index',
         () {
-          final config = state.configurations[state.focusedConfigIndex];
+          final config =
+              state.configurations[state.focusedConfigIndex]
+                  as FormSelectionConfig;
           state.updateFocusedConfigOption(-1);
           state.selectConfigOption();
           expect(
@@ -315,6 +359,20 @@ void main() {
         // auth config should no longer be in the configurations list
         expect(state.configurations, isNot(contains(TestConfig.auth)));
         expect(state.getSelectedOptionFor(TestConfig.auth), isNull);
+      },
+    );
+
+    test(
+      'when updating input for a FormInputConfig, '
+      'then the internal TextEditingController is updated',
+      () {
+        const projectId = 'my-project';
+
+        final controller = state.getInputControllerFor(InputConfig.projectId);
+        expect(controller?.text, isEmpty);
+
+        state.updateInput(InputConfig.projectId, projectId);
+        expect(controller?.text, projectId);
       },
     );
   });
