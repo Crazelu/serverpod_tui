@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:serverpod_tui/src/app_state_holder.dart';
-import 'package:serverpod_tui/src/strip_ansi.dart';
+import 'package:serverpod_tui/src/log/strip_ansi.dart';
 
 /// [IOSink] that splits captured stdout/stderr into lines and forwards
 /// each to [addLine] (e.g. `state.rawLines.add`).

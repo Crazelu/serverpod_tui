@@ -8,7 +8,6 @@ export 'src/format_duration.dart';
 export 'src/run_app.dart';
 export 'src/serverpod_theme.dart';
 export 'src/state.dart';
-export 'src/strip_ansi.dart';
 export 'src/terminal_backend.dart';
 export 'src/log/tui_log_sink.dart';
 export 'src/log/tui_log_writer.dart';

@@ -1,4 +1,4 @@
-import 'package:serverpod_tui/src/strip_ansi.dart';
+import 'package:serverpod_tui/src/log/strip_ansi.dart';
 import 'package:test/test.dart';
 
 void main() {

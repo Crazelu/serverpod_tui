@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:serverpod_tui/src/log/tui_log_sink.dart';
 import 'package:test/test.dart';
 
-import 'util.dart';
+import '../util.dart';
 
 void main() {
   late TestState state;

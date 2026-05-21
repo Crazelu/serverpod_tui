@@ -3,7 +3,7 @@ import 'package:serverpod_tui/src/log/tui_log_writer.dart';
 import 'package:serverpod_shared/log.dart';
 import 'package:test/test.dart';
 
-import 'util.dart';
+import '../util.dart';
 
 LogEntry _entry(String message, {LogLevel level = LogLevel.info}) => LogEntry(
   time: DateTime.now(),

@@ -1,6 +1,6 @@
 import 'package:serverpod_tui/src/app_state_holder.dart';
 import 'package:serverpod_tui/src/state.dart';
-import 'package:serverpod_tui/src/strip_ansi.dart';
+import 'package:serverpod_tui/src/log/strip_ansi.dart';
 import 'package:serverpod_shared/log.dart';
 
 /// A [LogWriter] that routes log entries and scopes to the TUI state.
