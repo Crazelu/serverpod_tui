@@ -1,6 +1,6 @@
 name: serverpod_tui
 description: A collection of tools for building terminal user interfaces.
-version: 0.0.1
+version: 0.1.0-rc.1
 repository: https://github.com/serverpod/nocterm_components
 homepage: https://serverpod.dev
 issue_tracker: https://github.com/serverpod/nocterm_components/issues
@@ -10,11 +10,12 @@ environment:
 
 dependencies:
   cli_tools: ^0.11.0
+  collection: ^1.18.0
   intl: ^0.20.2
   meta: ^1.15.0
   nocterm: ^0.6.0
   path: ^1.9.0
-  serverpod_shared: 3.5.0-beta.7
+  serverpod_shared: ^3.5.0-beta.7
   stream_transform: ^2.1.0
 
 dev_dependencies:
