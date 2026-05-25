@@ -2,6 +2,6 @@
 
 - Initial version.
 
-## 0.1.0
+## 0.1.0-rc.2
 
 Fixed terminal restoration on Windows
