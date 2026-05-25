@@ -220,9 +220,9 @@ class Form extends StatelessComponent {
           focused: configFocused,
           selected: selectedOption == defaultOption,
           onTap: () {
-            BoolFormConfigOption newOption = selectedOption == .enabled
-                ? .disabled
-                : .enabled;
+            final newOption = selectedOption == BoolFormConfigOption.enabled
+                ? BoolFormConfigOption.disabled
+                : BoolFormConfigOption.enabled;
             state.updateSelectedOption(config, newOption);
             rebuild();
           },
