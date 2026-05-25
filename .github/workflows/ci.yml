@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dart: [3.9]
+        dart: [3.10.3]
 
     steps:
       - name: Check out repository
