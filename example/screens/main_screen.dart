@@ -15,14 +15,14 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Component build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: .stretch,
+      mainAxisSize: .max,
       children: [
         Expanded(
           child: BorderedBox(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: .stretch,
+              mainAxisSize: .max,
               children: [
                 TabBar(
                   labels: ['Logs'],
@@ -40,33 +40,33 @@ class _MainScreenState extends State<MainScreen> {
                             'SERVERPOD version: 3.5.0-beta.1, dart: 3.11.0 '
                             '(stable) (Mon Feb 9 00:38:07 2026 -0800) on '
                             '"macos_arm64", time: 2026-04-01 07:20:19.806701Z',
-                        logLevel: LogLevel.info,
+                        logLevel: .info,
                       ),
                       LogMessage(
                         timestamp: DateTime.now(),
                         message: 'Webserver listening on http://localhost:8082',
-                        logLevel: LogLevel.info,
+                        logLevel: .info,
                       ),
                       LogMessage(
                         timestamp: DateTime.now(),
                         message: 'Some other message',
-                        logLevel: LogLevel.info,
+                        logLevel: .info,
                       ),
                       LogDivider(label: 'Hot reload (x4)'),
                       LogMessage(
                         timestamp: DateTime.now(),
                         message: 'We are back after the hot reload!!',
-                        logLevel: LogLevel.info,
+                        logLevel: .info,
                       ),
                       LogMessage(
                         timestamp: DateTime.now(),
                         message: 'Oops, something went wrong.',
-                        logLevel: LogLevel.warning,
+                        logLevel: .warning,
                       ),
                       LogMessage(
                         timestamp: DateTime.now(),
                         message: 'And now we crashed :(',
-                        logLevel: LogLevel.error,
+                        logLevel: .error,
                       ),
                     ],
                   ),
@@ -80,25 +80,25 @@ class _MainScreenState extends State<MainScreen> {
             Button(
               name: 'Hot Reload',
               activationChar: 'R',
-              activationKeys: const [LogicalKey.keyR],
+              activationKeys: const [.keyR],
               onActivate: (_) {},
             ),
             Button(
               name: 'Create Migration',
               activationChar: 'M',
-              activationKeys: const [LogicalKey.keyM],
+              activationKeys: const [.keyM],
               onActivate: (_) {},
             ),
             Button(
               name: 'Apply Migration',
               activationChar: 'A',
-              activationKeys: const [LogicalKey.keyA],
+              activationKeys: const [.keyA],
               onActivate: (_) {},
             ),
             Button(
               name: 'Quit',
               activationChar: 'Q',
-              activationKeys: const [LogicalKey.keyQ],
+              activationKeys: const [.keyQ],
               onActivate: (_) {
                 shutdownTuiApp(0);
               },
@@ -115,7 +115,8 @@ enum LogLevel {
   info('info ', Colors.blue),
   warning('warn ', Colors.yellow),
   error('error', Colors.red),
-  fatal('fatal', Colors.brightRed);
+  fatal('fatal', Colors.brightRed)
+  ;
 
   const LogLevel(this.label, this.color);
   final String label;
@@ -138,15 +139,15 @@ class LogMessage extends StatelessComponent {
   @override
   Component build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: .start,
+      mainAxisAlignment: .start,
+      mainAxisSize: .max,
       children: [
         Text(logLevel.label, style: TextStyle(color: logLevel.color)),
         SizedBox(width: 1),
         Text(
           _timeFormat.format(timestamp.toLocal()),
-          style: TextStyle(fontWeight: FontWeight.dim),
+          style: TextStyle(fontWeight: .dim),
         ),
         SizedBox(width: 1),
         Expanded(child: Text(message)),

@@ -7,18 +7,18 @@ import 'package:nocterm/nocterm.dart';
 enum Screen { loading, main }
 
 void main() {
-  runTuiApp(const ExampleApp());
+  runTuiApp(const Counter());
 }
 
-class ExampleApp extends StatefulComponent {
-  const ExampleApp({super.key});
+class Counter extends StatefulComponent {
+  const Counter({super.key});
 
   @override
-  State<ExampleApp> createState() => _ExampleAppState();
+  State<Counter> createState() => _CounterState();
 }
 
-class _ExampleAppState extends State<ExampleApp> with TickerProviderStateMixin {
-  Screen _screen = Screen.loading;
+class _CounterState extends State<Counter> with TickerProviderStateMixin {
+  Screen _screen = .loading;
 
   @override
   Component build(BuildContext context) {
