@@ -30,13 +30,15 @@ void _restoreTerminal() {
 
 /// Run a TUI app with terminal settings restoration.
 ///
-/// When [onShutdownSignal] is null (the default), SIGINT/SIGTERM trigger an
-/// immediate `shutdownTuiApp()` and the app exits without running any user
-/// cleanup.
+/// SIGINT (Ctrl-C) is intentionally not handled here. The nocterm backend
+/// converts it into a Ctrl-C keyboard event routed through the component tree,
+/// which [TuiAppState] intercepts to copy the current selection or require a
+/// second press before exiting.
 ///
-/// When [onShutdownSignal] is provided, signals invoke that callback instead.
-/// The caller is then responsible for running cleanup and eventually calling
-/// `shutdownTuiApp(...)` to tear down the nocterm renderer.
+/// SIGTERM still triggers shutdown. When [onShutdownSignal] is null (the
+/// default), it runs an immediate `shutdownTuiApp()`. When provided, SIGTERM
+/// invokes that callback instead, and the caller is responsible for cleanup
+/// and eventually calling `shutdownTuiApp(...)` to tear down the renderer.
 Future<void> runTuiApp(
   Component app, {
   bool enableHotReload = true,
@@ -58,7 +60,7 @@ Future<void> runTuiApp(
       ? onShutDownSignalDefault
       : onShutDownSignalDelegated;
 
-  ProcessSignal.sigint.watch().listen(handler);
+  // SIGINT is handled in-app via TuiAppState; see the doc comment above.
   if (!Platform.isWindows) {
     ProcessSignal.sigterm.watch().listen(handler);
   }
