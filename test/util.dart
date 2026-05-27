@@ -1,3 +1,4 @@
+import 'package:nocterm/nocterm.dart';
 import 'package:serverpod_tui/src/app.dart';
 import 'package:serverpod_tui/src/app_state_holder.dart';
 import 'package:serverpod_tui/src/bounded_queue_list.dart';
@@ -36,4 +37,25 @@ class TestStateHolder extends TuiAppStateHolder<TestState> {
 
   @override
   TuiAppState? get widgetState => null;
+}
+
+/// A minimal [TuiApp] for exercising base [TuiAppState] behavior in tests.
+///
+/// [onExitCallback] stands in for app-specific teardown so a confirming Ctrl-C
+/// is observable without actually shutting the process down.
+class TestApp extends TuiApp<TestStateHolder> {
+  const TestApp({super.key, required super.holder, this.onExitCallback});
+
+  final void Function()? onExitCallback;
+
+  @override
+  TuiAppState<TuiApp> createState() => TestAppState();
+}
+
+class TestAppState extends TuiAppState<TestApp> {
+  @override
+  void onExit() => component.onExitCallback?.call();
+
+  @override
+  Component buildApp(BuildContext context) => const SizedBox();
 }

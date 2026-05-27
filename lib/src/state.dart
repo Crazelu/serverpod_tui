@@ -11,6 +11,16 @@ abstract class TuiState {
 
   /// Currently active tracked operations (keyed by ID).
   Map<String, TrackedOperation> get activeOperations;
+
+  /// The text currently highlighted in a log view, or empty when there is no
+  /// selection. Updated as the user drags a selection and read when Ctrl-C is
+  /// pressed so the selection can be copied to the clipboard.
+  String selectedText = '';
+
+  /// Transient message shown at the bottom of the screen, e.g.
+  /// "Copied to clipboard" after a copy or "Press Ctrl-C again to exit" while
+  /// exit is armed. Null when nothing should be shown.
+  String? ctrlCHint;
 }
 
 /// A tracked operation (server session or CLI progress).
