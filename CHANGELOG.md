@@ -1,3 +1,7 @@
+## 0.1.0-rc.5
+
+Added support for form input validation and suffix text.
+
 ## 0.1.0-rc.4
 
 Updated Ctrl-C behavior to match common CLI tools: copies the current selection if there is one, otherwise a first press arms exit and a second press within two seconds exits gracefully.
