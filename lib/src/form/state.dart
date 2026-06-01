@@ -56,8 +56,7 @@ class FormState {
         _selectionState[config] ??= config.defaultOptions;
         _focusedOptionState[config] ??= _FormConfigState(config);
       } else if (config is FormInputConfig) {
-        final controller =
-            _inputState[config] ??= ValidatingTextController();
+        final controller = _inputState[config] ??= ValidatingTextController();
         final validator = _validators[config];
         if (validator != null) {
           controller.setValidator(validator);
@@ -206,6 +205,14 @@ class FormState {
   ) {
     final value = _selectionState[config];
     return value?.contains(option) ?? false;
+  }
+
+  /// Disposes all resources held by this state.
+  void dispose() {
+    for (final controller in _inputState.values) {
+      controller.dispose();
+    }
+    _inputState.clear();
   }
 }
 
