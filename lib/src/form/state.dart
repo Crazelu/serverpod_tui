@@ -1,7 +1,7 @@
-import 'package:nocterm/nocterm.dart';
 import 'package:serverpod_tui/src/form/config.dart';
 import 'package:serverpod_tui/src/form/config_option.dart';
 import 'package:serverpod_tui/src/form/requirement.dart';
+import 'package:serverpod_tui/src/form/validating_text_controller.dart';
 
 /// State for a `Form` component.
 /// This manages states for text input, focus
@@ -24,7 +24,10 @@ class FormState {
   final Map<FormSelectionConfig, Set<FormConfigOption>> _selectionState = {};
 
   /// Tracked input state per [FormInputConfig].
-  final Map<FormInputConfig, TextEditingController> _inputState = {};
+  final Map<FormInputConfig, ValidatingTextController> _inputState = {};
+
+  /// Persisted validators that survive config removal and recreation.
+  final Map<FormInputConfig, String? Function(String)?> _validators = {};
 
   int _maxFocusedConfigIndex = 0;
 
@@ -53,7 +56,12 @@ class FormState {
         _selectionState[config] ??= config.defaultOptions;
         _focusedOptionState[config] ??= _FormConfigState(config);
       } else if (config is FormInputConfig) {
-        _inputState[config] ??= TextEditingController();
+        final controller =
+            _inputState[config] ??= ValidatingTextController();
+        final validator = _validators[config];
+        if (validator != null) {
+          controller.setValidator(validator);
+        }
       }
     }
 
@@ -175,9 +183,20 @@ class FormState {
     return getInputControllerFor(config)?.text;
   }
 
-  /// Returns the [TextEditingController] for [config], if any.
-  TextEditingController? getInputControllerFor(FormInputConfig config) {
+  /// Returns the [ValidatingTextController] for [config], if any.
+  ValidatingTextController? getInputControllerFor(FormInputConfig config) {
     return _inputState[config];
+  }
+
+  /// Sets a validator function for [config] that will run on every text change.
+  /// The validator is persisted so it survives config removal and recreation
+  /// when requirements are not met.
+  void setValidator(
+    FormInputConfig config,
+    String? Function(String)? validator,
+  ) {
+    _validators[config] = validator;
+    _inputState[config]?.setValidator(validator);
   }
 
   /// Returns true if [option] is a selected option for [config].

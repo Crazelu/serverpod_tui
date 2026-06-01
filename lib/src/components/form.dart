@@ -17,6 +17,7 @@ class Form extends StatelessComponent {
     required this.rebuild,
     this.spacing = 1,
     this.padding = const EdgeInsets.symmetric(horizontal: 1),
+    this.onSubmit,
   });
 
   final FormState state;
@@ -24,6 +25,9 @@ class Form extends StatelessComponent {
   final VoidCallback rebuild;
   final double spacing;
   final EdgeInsets padding;
+
+  /// Called when Enter is pressed while a text input is focused.
+  final VoidCallback? onSubmit;
 
   @override
   Component build(BuildContext context) {
@@ -102,6 +106,7 @@ class Form extends StatelessComponent {
     required bool configFocused,
   }) {
     final controller = state.getInputControllerFor(config);
+    if (controller == null) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,39 +123,84 @@ class Form extends StatelessComponent {
             state.requestFocus(config);
             rebuild();
           },
-          child: TextField(
-            maxLines: config.maxLines,
-            width: config.width,
-            controller: controller,
-            focused: configFocused,
-            cursorBlinkRate: Duration(milliseconds: 700),
-            decoration: InputDecoration(
-              border: BoxBorder.all(),
-              focusedBorder: BoxBorder.all(),
-            ),
-            onKeyEvent: (event) {
-              switch (event.logicalKey) {
-                case LogicalKey.arrowUp:
-                  state.updateFocusedConfig(-1);
-                  if (state.focusedConfigIndex == state.maxFocusedConfigIndex) {
-                    scrollController.scrollToEnd();
-                  } else {
-                    scrollController.scrollUp(3);
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ValueListenableBuilder<String?>(
+                    valueListenable: controller.error,
+                    builder: (context, error, child) {
+                      final border = BoxBorder.all(
+                        color: error != null
+                            ? theme.errorLevel
+                            : Color.fromRGB(255, 255, 255),
+                      );
+
+                      return TextField(
+                        maxLines: config.maxLines,
+                        width: config.width,
+                        controller: controller,
+                        focused: configFocused,
+                        cursorBlinkRate: Duration(milliseconds: 700),
+                        decoration: InputDecoration(
+                          border: border,
+                          focusedBorder: border,
+                        ),
+                        onKeyEvent: (event) {
+                          switch (event.logicalKey) {
+                            case LogicalKey.enter:
+                              onSubmit?.call();
+                              return onSubmit != null;
+                            case LogicalKey.arrowUp:
+                              state.updateFocusedConfig(-1);
+                              if (state.focusedConfigIndex ==
+                                  state.maxFocusedConfigIndex) {
+                                scrollController.scrollToEnd();
+                              } else {
+                                scrollController.scrollUp(3);
+                              }
+                              rebuild();
+                              return true;
+                            case LogicalKey.arrowDown:
+                              state.updateFocusedConfig(1);
+                              if (state.focusedConfigIndex == 0) {
+                                scrollController.scrollToStart();
+                              } else {
+                                scrollController.scrollDown(3);
+                              }
+                              rebuild();
+                              return true;
+                          }
+                          return false;
+                        },
+                      );
+                    },
+                  ),
+                  if (config.suffixText case final suffix?)
+                    Padding(
+                      padding: EdgeInsets.only(top: config.maxLines / 2),
+                      child: Text(
+                        suffix,
+                        style: const TextStyle(color: Colors.gray),
+                      ),
+                    ),
+                ],
+              ),
+              ValueListenableBuilder<String?>(
+                valueListenable: controller.error,
+                builder: (context, error, child) {
+                  if (error case final message?) {
+                    return Text(
+                      message,
+                      style: TextStyle(color: theme.errorLevel),
+                    );
                   }
-                  rebuild();
-                  return true;
-                case LogicalKey.arrowDown:
-                  state.updateFocusedConfig(1);
-                  if (state.focusedConfigIndex == 0) {
-                    scrollController.scrollToStart();
-                  } else {
-                    scrollController.scrollDown(3);
-                  }
-                  rebuild();
-                  return true;
-              }
-              return false;
-            },
+                  return const SizedBox.shrink();
+                },
+              ),
+            ],
           ),
         ),
       ],

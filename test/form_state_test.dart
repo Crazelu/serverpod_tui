@@ -2,6 +2,7 @@ import 'package:serverpod_tui/src/form/config.dart';
 import 'package:serverpod_tui/src/form/config_option.dart';
 import 'package:serverpod_tui/src/form/requirement.dart';
 import 'package:serverpod_tui/src/form/state.dart';
+import 'package:serverpod_tui/src/form/validating_text_controller.dart';
 import 'package:test/test.dart';
 
 enum InputConfig<T extends FormConfigOption> implements FormInputConfig {
@@ -12,6 +13,7 @@ enum InputConfig<T extends FormConfigOption> implements FormInputConfig {
     required this.label,
     this.maxLines = 1,
     this.width = 10,
+    this.suffixText = '',
     this.requirements = const [],
   });
 
@@ -23,6 +25,9 @@ enum InputConfig<T extends FormConfigOption> implements FormInputConfig {
 
   @override
   final double width;
+
+  @override
+  final String? suffixText;
 
   @override
   final List<FormRequirement> requirements;
@@ -375,5 +380,33 @@ void main() {
         expect(controller?.text, projectId);
       },
     );
+
+    group('when a validator is set on an input config', () {
+      late ValidatingTextController controller;
+
+      setUp(() {
+        controller = state.getInputControllerFor(InputConfig.projectId)!;
+        state.setValidator(
+          InputConfig.projectId,
+          (text) => text.isEmpty ? 'Required' : null,
+        );
+      });
+
+      test(
+        'then the controller error value is null when text is valid',
+        () {
+          controller.text = 'valid';
+          expect(controller.error.value, isNull);
+        },
+      );
+
+      test(
+        'then the controller error value is set when text is invalid',
+        () {
+          controller.text = '';
+          expect(controller.error.value, 'Required');
+        },
+      );
+    });
   });
 }

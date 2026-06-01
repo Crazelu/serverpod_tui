@@ -18,6 +18,9 @@ abstract interface class FormInputConfig implements FormConfig {
 
   /// Width of text input in the UI.
   double get width;
+
+  /// Optional suffix text displayed after the input value.
+  String? get suffixText;
 }
 
 /// A selection configuration for a form.
