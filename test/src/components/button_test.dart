@@ -113,8 +113,6 @@ void main() {
       'when Ctrl+activation key is pressed, '
       'then neither callback fires so app-level handlers receive the event',
       () async {
-        // Regression: Ctrl+R in the start TUI must reach the app-level
-        // relaunch handler instead of triggering the R button's hot reload.
         var activateFired = false;
         var shiftFired = false;
         tester = await _pumpButton(
