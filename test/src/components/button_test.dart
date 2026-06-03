@@ -111,7 +111,41 @@ void main() {
 
     test(
       'when Ctrl+activation key is pressed, '
-      'then neither callback fires so app-level handlers receive the event',
+      'then neither callback fires and the event propagates outward',
+      () async {
+        var activateFired = false;
+        var shiftFired = false;
+        KeyboardEvent? propagated;
+        tester = await NoctermTester.create(size: const Size(20, 1));
+        await tester.pumpComponent(
+          Focusable(
+            focused: true,
+            onKeyEvent: (event) {
+              propagated = event;
+              return true;
+            },
+            child: Button(
+              name: 'Reload',
+              activationChar: 'R',
+              activationKeys: const [LogicalKey.keyR],
+              onActivate: (_) => activateFired = true,
+              onShiftActivate: (_) => shiftFired = true,
+            ),
+          ),
+        );
+
+        await _send(tester, LogicalKey.keyR, ctrl: true);
+
+        expect(activateFired, isFalse);
+        expect(shiftFired, isFalse);
+        expect(propagated?.logicalKey, LogicalKey.keyR);
+        expect(propagated?.isControlPressed, isTrue);
+      },
+    );
+
+    test(
+      'when Ctrl+Shift+activation key is pressed, '
+      'then neither callback fires',
       () async {
         var activateFired = false;
         var shiftFired = false;
@@ -120,25 +154,9 @@ void main() {
           onShiftActivate: (_) => shiftFired = true,
         );
 
-        await _send(tester, LogicalKey.keyR, ctrl: true);
-
-        expect(activateFired, isFalse);
-        expect(shiftFired, isFalse);
-      },
-    );
-
-    test(
-      'when Ctrl+Shift+activation key is pressed, '
-      'then onShiftActivate does not fire',
-      () async {
-        var shiftFired = false;
-        tester = await _pumpButton(
-          onActivate: (_) {},
-          onShiftActivate: (_) => shiftFired = true,
-        );
-
         await _send(tester, LogicalKey.keyR, shift: true, ctrl: true);
 
+        expect(activateFired, isFalse);
         expect(shiftFired, isFalse);
       },
     );
