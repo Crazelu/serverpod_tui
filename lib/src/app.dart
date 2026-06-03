@@ -73,6 +73,11 @@ abstract class TuiAppState<S extends TuiApp> extends State<S> {
 
     if (state.selectedText.isNotEmpty) {
       ClipboardManager.copy(state.selectedText);
+      // Consume the selection so the next Ctrl-C arms exit. The visual
+      // highlight is dropped when the log views re-render (e.g. the hint
+      // line shifts layout), so keeping the text would let later Ctrl-C
+      // presses silently re-copy a selection that is no longer on screen.
+      state.selectedText = '';
       _disarmExit();
       _showHint('Copied to clipboard', autoClear: true);
       return true;
