@@ -6,6 +6,9 @@ abstract interface class FormConfig<T extends FormConfigOption> {
   /// UI visible label for this config.
   String get label;
 
+  /// Optional description for this config.
+  String? get description;
+
   /// Requirements for other related configs that must be satisfied
   /// for this config to be enabled.
   List<FormRequirement> get requirements;

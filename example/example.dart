@@ -1,10 +1,11 @@
 import 'package:serverpod_tui/serverpod_tui.dart';
 
+import 'screens/form_screen.dart';
 import 'screens/loading_screen.dart';
 import 'screens/main_screen.dart';
 import 'package:nocterm/nocterm.dart';
 
-enum Screen { loading, main }
+enum Screen { loading, main, form }
 
 void main() {
   runTuiApp(const ExampleApp());
@@ -28,19 +29,26 @@ class _ExampleAppState extends State<ExampleApp> with TickerProviderStateMixin {
         screenComponent = LoadingScreen();
       case Screen.main:
         screenComponent = MainScreen();
+      case Screen.form:
+        screenComponent = FormScreen();
     }
 
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
-        if (event.logicalKey == LogicalKey.space) {
-          setState(() {
-            final nextIndex = (_screen.index + 1) % Screen.values.length;
-            _screen = Screen.values[nextIndex];
-          });
-          return true;
+        switch (event.logicalKey) {
+          case LogicalKey.space:
+            setState(() {
+              final nextIndex = (_screen.index + 1) % Screen.values.length;
+              _screen = Screen.values[nextIndex];
+            });
+            return true;
+          case LogicalKey.escape:
+            shutdownTuiApp();
+            return true;
+          default:
+            return false;
         }
-        return false;
       },
       child: screenComponent,
     );

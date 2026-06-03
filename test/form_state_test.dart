@@ -15,6 +15,7 @@ enum InputConfig<T extends FormConfigOption> implements FormInputConfig {
     this.width = 10,
     this.suffixText = '',
     this.requirements = const [],
+    this.description,
   });
 
   @override
@@ -28,6 +29,9 @@ enum InputConfig<T extends FormConfigOption> implements FormInputConfig {
 
   @override
   final String? suffixText;
+
+  @override
+  final String? description;
 
   @override
   final List<FormRequirement> requirements;
@@ -64,6 +68,7 @@ enum TestConfig<T extends FormConfigOption> implements FormSelectionConfig<T> {
     required this.defaultOptions,
     this.requirements = const [],
     this.multiSelect = false,
+    this.description,
   });
 
   @override
@@ -80,6 +85,9 @@ enum TestConfig<T extends FormConfigOption> implements FormSelectionConfig<T> {
 
   @override
   final bool multiSelect;
+
+  @override
+  final String? description;
 }
 
 enum DatabaseConfigOption implements FormConfigOption {
