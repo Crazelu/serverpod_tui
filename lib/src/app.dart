@@ -166,8 +166,10 @@ abstract class TuiAppState<S extends TuiApp> extends State<S> {
             padding: const EdgeInsets.symmetric(horizontal: 1),
             child: Text(
               hint,
-              style:
-                  TextStyle(color: st.brightText, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: st.brightText,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
       ],
