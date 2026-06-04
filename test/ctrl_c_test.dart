@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:nocterm/nocterm.dart' hide isEmpty;
 import 'package:test/test.dart';
 
 import 'util.dart';
@@ -45,6 +45,24 @@ void main() {
 
         expect(ClipboardManager.paste(), 'a selected log line');
         expect(state.ctrlCHint, 'Copied to clipboard');
+        expect(exited, isFalse);
+      },
+    );
+
+    test('when Ctrl-C is pressed then the selection is consumed', () async {
+      await _sendCtrlC(tester);
+
+      expect(state.selectedText, isEmpty);
+    });
+
+    test(
+      'when Ctrl-C is pressed twice then the second press arms exit '
+      'instead of re-copying',
+      () async {
+        await _sendCtrlC(tester);
+        await _sendCtrlC(tester);
+
+        expect(state.ctrlCHint, 'Press Ctrl-C again to exit');
         expect(exited, isFalse);
       },
     );

@@ -20,11 +20,18 @@ Future<NoctermTester> _pumpButton({
   return tester;
 }
 
-Future<void> _send(NoctermTester tester, LogicalKey key, {bool shift = false}) {
+Future<void> _send(
+  NoctermTester tester,
+  LogicalKey key, {
+  bool shift = false,
+  bool ctrl = false,
+  bool alt = false,
+  bool meta = false,
+}) {
   return tester.sendKeyEvent(
     KeyboardEvent(
       logicalKey: key,
-      modifiers: ModifierKeys(shift: shift),
+      modifiers: ModifierKeys(shift: shift, ctrl: ctrl, alt: alt, meta: meta),
     ),
   );
 }
@@ -46,6 +53,21 @@ void main() {
         await _send(tester, LogicalKey.keyR);
 
         expect(activated, LogicalKey.keyR);
+      },
+    );
+
+    test(
+      'when the activation key is pressed with Ctrl, Alt, or Meta held, '
+      'then onActivate does not fire',
+      () async {
+        var activations = 0;
+        tester = await _pumpButton(onActivate: (_) => activations++);
+
+        await _send(tester, LogicalKey.keyR, ctrl: true);
+        await _send(tester, LogicalKey.keyR, alt: true);
+        await _send(tester, LogicalKey.keyR, meta: true);
+
+        expect(activations, 0);
       },
     );
   });
@@ -84,6 +106,58 @@ void main() {
 
         expect(shiftActivated, LogicalKey.keyR);
         expect(activateFired, isFalse);
+      },
+    );
+
+    test(
+      'when Ctrl+activation key is pressed, '
+      'then neither callback fires and the event propagates outward',
+      () async {
+        var activateFired = false;
+        var shiftFired = false;
+        KeyboardEvent? propagated;
+        tester = await NoctermTester.create(size: const Size(20, 1));
+        await tester.pumpComponent(
+          Focusable(
+            focused: true,
+            onKeyEvent: (event) {
+              propagated = event;
+              return true;
+            },
+            child: Button(
+              name: 'Reload',
+              activationChar: 'R',
+              activationKeys: const [LogicalKey.keyR],
+              onActivate: (_) => activateFired = true,
+              onShiftActivate: (_) => shiftFired = true,
+            ),
+          ),
+        );
+
+        await _send(tester, LogicalKey.keyR, ctrl: true);
+
+        expect(activateFired, isFalse);
+        expect(shiftFired, isFalse);
+        expect(propagated?.logicalKey, LogicalKey.keyR);
+        expect(propagated?.isControlPressed, isTrue);
+      },
+    );
+
+    test(
+      'when Ctrl+Shift+activation key is pressed, '
+      'then neither callback fires',
+      () async {
+        var activateFired = false;
+        var shiftFired = false;
+        tester = await _pumpButton(
+          onActivate: (_) => activateFired = true,
+          onShiftActivate: (_) => shiftFired = true,
+        );
+
+        await _send(tester, LogicalKey.keyR, shift: true, ctrl: true);
+
+        expect(activateFired, isFalse);
+        expect(shiftFired, isFalse);
       },
     );
   });

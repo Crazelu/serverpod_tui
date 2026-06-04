@@ -31,6 +31,14 @@ class Button extends StatelessComponent {
     return Focusable(
       focused: enabled,
       onKeyEvent: (event) {
+        // Ctrl/Alt/Meta combos are not button activations - they belong to
+        // app-level handlers (e.g. Ctrl+R). Without this guard, `matches`
+        // with only `shift` constrained would consume them as the plain key.
+        if (event.isControlPressed ||
+            event.isAltPressed ||
+            event.isMetaPressed) {
+          return false;
+        }
         for (final key in activationKeys) {
           if (hasShiftVariant) {
             if (event.matches(key, shift: false)) {
