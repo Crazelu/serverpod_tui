@@ -19,7 +19,7 @@ class RadioButton extends StatelessComponent {
     final indicator = value ? '●' : '○';
 
     return Text(
-      '$indicator $label',
+      ' $indicator $label ',
       style: TextStyle(
         color: Color.defaultColor,
         backgroundColor: focused ? theme.activationKey : null,
