@@ -21,10 +21,35 @@ class FormScreenState extends State<FormScreen> {
 
   @override
   Component build(BuildContext context) {
-    return Form(
-      state: formState,
-      scrollController: scrollController,
-      rebuild: () => setState(() {}),
+    return Column(
+      children: [
+        Expanded(
+          child: Form(
+            state: formState,
+            scrollController: scrollController,
+            rebuild: () => setState(() {}),
+          ),
+        ),
+        ButtonBar(
+          buttons: [
+            Button(
+              name: 'Continue',
+              activationChar: 'Enter',
+              activationKeys: const [LogicalKey.enter],
+              enabled: false,
+              onActivate: (_) {},
+            ),
+            Button(
+              name: 'Quit',
+              activationChar: 'Q',
+              activationKeys: const [LogicalKey.keyQ],
+              onActivate: (_) {
+                shutdownTuiApp();
+              },
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:nocterm/nocterm.dart';
 
 const _serverpodBlue = Color.fromRGB(147, 197, 253);
+const _purple = Color.fromRGB(140, 90, 220);
 
 /// Serverpod-specific TUI theme colors layered on top of [TuiThemeData].
 class ServerpodThemeData {
@@ -82,7 +83,7 @@ class ServerpodThemeData {
     final darkThemed = theme.brightness == Brightness.dark;
     return ServerpodThemeData(
       primary: _serverpodBlue,
-      activationKey: Colors.magenta,
+      activationKey: _purple,
       spinner: _serverpodBlue,
       debugLevel: theme.outline,
       infoLevel: theme.primary,
@@ -98,7 +99,7 @@ class ServerpodThemeData {
   /// Default dark theme.
   static const dark = ServerpodThemeData(
     primary: _serverpodBlue,
-    activationKey: Colors.magenta,
+    activationKey: _purple,
     spinner: _serverpodBlue,
     debugLevel: Colors.gray,
     infoLevel: Colors.blue,
