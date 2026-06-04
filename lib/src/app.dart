@@ -151,19 +151,25 @@ abstract class TuiAppState<S extends TuiApp> extends State<S> {
 
   Component _withCtrlCHint(BuildContext context, Component child) {
     final hint = component.holder.state.ctrlCHint;
-    if (hint == null) return child;
-
     final st = ServerpodTheme.of(context);
+
+    // Always wrap in the same Column, only toggling the hint row. Returning
+    // the bare child when there is no hint would change the component type in
+    // this slot, remounting the entire app subtree (and losing all of its
+    // state: scroll positions, selections, splash fade progress) every time
+    // the hint appears or disappears.
     return Column(
       children: [
         Expanded(child: child),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 1),
-          child: Text(
-            hint,
-            style: TextStyle(color: st.brightText, fontWeight: FontWeight.bold),
+        if (hint != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 1),
+            child: Text(
+              hint,
+              style:
+                  TextStyle(color: st.brightText, fontWeight: FontWeight.bold),
+            ),
           ),
-        ),
       ],
     );
   }
