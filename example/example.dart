@@ -33,24 +33,37 @@ class _ExampleAppState extends State<ExampleApp> with TickerProviderStateMixin {
         screenComponent = FormScreen();
     }
 
-    return Focusable(
-      focused: true,
-      onKeyEvent: (event) {
-        switch (event.logicalKey) {
-          case LogicalKey.space:
-            setState(() {
-              final nextIndex = (_screen.index + 1) % Screen.values.length;
-              _screen = Screen.values[nextIndex];
-            });
-            return true;
-          case LogicalKey.escape:
-            shutdownTuiApp();
-            return true;
-          default:
-            return false;
-        }
-      },
-      child: screenComponent,
+    return NoctermApp(
+      child: Builder(
+        builder: (context) {
+          final themeData = TuiTheme.of(context);
+          return TuiTheme(
+            data: themeData.copyWith(
+              background: Color.defaultColor,
+            ),
+            child: Focusable(
+              focused: true,
+              onKeyEvent: (event) {
+                switch (event.logicalKey) {
+                  case LogicalKey.space:
+                    setState(() {
+                      final nextIndex =
+                          (_screen.index + 1) % Screen.values.length;
+                      _screen = Screen.values[nextIndex];
+                    });
+                    return true;
+                  case LogicalKey.escape:
+                    shutdownTuiApp();
+                    return true;
+                  default:
+                    return false;
+                }
+              },
+              child: screenComponent,
+            ),
+          );
+        },
+      ),
     );
   }
 }
