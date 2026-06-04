@@ -57,7 +57,10 @@ class FormScreenState extends State<FormScreen> {
 enum InputConfig<T extends FormConfigOption> implements FormInputConfig {
   projectId(
     label: 'Project ID',
-    description: 'A unique identifier for your project',
+    description: FormDescription(
+      label: 'A unique identifier for your project',
+      spacing: 2,
+    ),
     suffixText: '.serverpod',
   )
   ;
@@ -84,7 +87,7 @@ enum InputConfig<T extends FormConfigOption> implements FormInputConfig {
   final String? suffixText;
 
   @override
-  final String? description;
+  final FormDescription? description;
 
   @override
   final List<FormRequirement> requirements;
@@ -101,8 +104,11 @@ enum SelectionConfig<T extends FormConfigOption>
     label: 'Authentication',
     options: BoolFormConfigOption.values,
     defaultOptions: {BoolFormConfigOption.enabled},
-    description:
-        'Enable authentication if you want your users to be able to sign in with email or social logins.',
+    description: FormDescription(
+      label:
+          'Enable authentication if you want your users to be able to sign in with email or social logins.',
+      spacing: 1,
+    ),
     requirements: [
       FormRequirement(
         config: SelectionConfig.database,
@@ -115,7 +121,10 @@ enum SelectionConfig<T extends FormConfigOption>
     options: IdeOption.values,
     multiSelect: true,
     defaultOptions: <IdeOption>{},
-    description: 'Select the editors and agents you are planning to use',
+    description: FormDescription(
+      label: 'Select the editors and agents you are planning to use',
+      spacing: 2,
+    ),
   )
   ;
 
@@ -144,7 +153,7 @@ enum SelectionConfig<T extends FormConfigOption>
   final bool multiSelect;
 
   @override
-  final String? description;
+  final FormDescription? description;
 }
 
 enum DatabaseConfigOption implements FormConfigOption {

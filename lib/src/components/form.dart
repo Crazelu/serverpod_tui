@@ -116,10 +116,10 @@ class Form extends StatelessComponent {
         ),
         const SizedBox(height: 1),
         child,
-        if (config.description case final String description) ...[
-          const SizedBox(height: 2),
+        if (config.description case final FormDescription description) ...[
+          SizedBox(height: description.spacing),
           Text(
-            description,
+            description.label,
             style: const TextStyle(
               color: Color.defaultColor,
               fontWeight: FontWeight.dim,

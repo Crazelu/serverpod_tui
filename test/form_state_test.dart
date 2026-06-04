@@ -31,7 +31,7 @@ enum InputConfig<T extends FormConfigOption> implements FormInputConfig {
   final String? suffixText;
 
   @override
-  final String? description;
+  final FormDescription? description;
 
   @override
   final List<FormRequirement> requirements;
@@ -87,7 +87,7 @@ enum TestConfig<T extends FormConfigOption> implements FormSelectionConfig<T> {
   final bool multiSelect;
 
   @override
-  final String? description;
+  final FormDescription? description;
 }
 
 enum DatabaseConfigOption implements FormConfigOption {
