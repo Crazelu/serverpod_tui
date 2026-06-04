@@ -1,3 +1,9 @@
+## 0.1.0-rc.6
+
+Fixed buttons activating on Ctrl, Alt, and Meta key combinations so app-level shortcuts reach their handlers.
+Fixed the Ctrl-C hint toggling remounting the whole app subtree and resetting its state.
+Fixed text selection getting swallowed up on Windows.
+
 ## 0.1.0-rc.5
 
 Added support for form input validation and suffix text.
