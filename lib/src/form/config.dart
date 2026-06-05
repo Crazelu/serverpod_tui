@@ -6,9 +6,26 @@ abstract interface class FormConfig<T extends FormConfigOption> {
   /// UI visible label for this config.
   String get label;
 
+  /// Optional description for this config.
+  FormDescription? get description;
+
   /// Requirements for other related configs that must be satisfied
   /// for this config to be enabled.
   List<FormRequirement> get requirements;
+}
+
+/// Description for a form config.
+class FormDescription {
+  const FormDescription({
+    required this.label,
+    this.spacing = 1,
+  });
+
+  /// The description text.
+  final String label;
+
+  /// Spacing between the description and the form input in the UI.
+  final double spacing;
 }
 
 /// A text input configuration for a form.

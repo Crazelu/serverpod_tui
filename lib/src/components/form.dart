@@ -100,14 +100,10 @@ class Form extends StatelessComponent {
     );
   }
 
-  Component _buildInputConfiguration({
-    required ServerpodThemeData theme,
-    required FormInputConfig config,
-    required bool configFocused,
+  Component _buildConfigurationLayout({
+    required FormConfig config,
+    required Component child,
   }) {
-    final controller = state.getInputControllerFor(config);
-    if (controller == null) return const SizedBox.shrink();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -118,92 +114,117 @@ class Form extends StatelessComponent {
             fontWeight: FontWeight.bold,
           ),
         ),
-        GestureDetector(
-          onTap: () {
-            state.requestFocus(config);
-            rebuild();
-          },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ValueListenableBuilder<String?>(
-                    valueListenable: controller.error,
-                    builder: (context, error, child) {
-                      final border = BoxBorder.all(
-                        color: error != null
-                            ? theme.errorLevel
-                            : Color.fromRGB(255, 255, 255),
-                      );
-
-                      return TextField(
-                        maxLines: config.maxLines,
-                        width: config.width,
-                        controller: controller,
-                        focused: configFocused,
-                        cursorBlinkRate: Duration(milliseconds: 700),
-                        decoration: InputDecoration(
-                          border: border,
-                          focusedBorder: border,
-                        ),
-                        onKeyEvent: (event) {
-                          switch (event.logicalKey) {
-                            case LogicalKey.enter:
-                              onSubmit?.call();
-                              return onSubmit != null;
-                            case LogicalKey.arrowUp:
-                              state.updateFocusedConfig(-1);
-                              if (state.focusedConfigIndex ==
-                                  state.maxFocusedConfigIndex) {
-                                scrollController.scrollToEnd();
-                              } else {
-                                scrollController.scrollUp(3);
-                              }
-                              rebuild();
-                              return true;
-                            case LogicalKey.arrowDown:
-                              state.updateFocusedConfig(1);
-                              if (state.focusedConfigIndex == 0) {
-                                scrollController.scrollToStart();
-                              } else {
-                                scrollController.scrollDown(3);
-                              }
-                              rebuild();
-                              return true;
-                          }
-                          return false;
-                        },
-                      );
-                    },
-                  ),
-                  if (config.suffixText case final suffix?)
-                    Padding(
-                      padding: EdgeInsets.only(top: config.maxLines / 2),
-                      child: Text(
-                        suffix,
-                        style: const TextStyle(color: Colors.gray),
-                      ),
-                    ),
-                ],
-              ),
-              ValueListenableBuilder<String?>(
-                valueListenable: controller.error,
-                builder: (context, error, child) {
-                  if (error case final message?) {
-                    return Text(
-                      message,
-                      style: TextStyle(color: theme.errorLevel),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-            ],
+        const SizedBox(height: 1),
+        child,
+        if (config.description case final FormDescription description) ...[
+          SizedBox(height: description.spacing),
+          Text(
+            description.label,
+            style: const TextStyle(
+              color: Color.defaultColor,
+              fontWeight: FontWeight.dim,
+            ),
           ),
-        ),
+        ],
       ],
+    );
+  }
+
+  Component _buildInputConfiguration({
+    required ServerpodThemeData theme,
+    required FormInputConfig config,
+    required bool configFocused,
+  }) {
+    final controller = state.getInputControllerFor(config);
+    if (controller == null) return const SizedBox.shrink();
+
+    return _buildConfigurationLayout(
+      config: config,
+      child: GestureDetector(
+        onTap: () {
+          state.requestFocus(config);
+          rebuild();
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ValueListenableBuilder<String?>(
+                  valueListenable: controller.error,
+                  builder: (context, error, child) {
+                    final border = BoxBorder.all(
+                      color: error != null
+                          ? theme.errorLevel
+                          : Color.fromRGB(255, 255, 255),
+                    );
+
+                    return TextField(
+                      maxLines: config.maxLines,
+                      width: config.width,
+                      controller: controller,
+                      focused: configFocused,
+                      cursorBlinkRate: Duration(milliseconds: 700),
+                      decoration: InputDecoration(
+                        border: border,
+                        focusedBorder: border,
+                      ),
+                      onKeyEvent: (event) {
+                        switch (event.logicalKey) {
+                          case LogicalKey.enter:
+                            onSubmit?.call();
+                            return onSubmit != null;
+                          case LogicalKey.arrowUp:
+                            state.updateFocusedConfig(-1);
+                            if (state.focusedConfigIndex ==
+                                state.maxFocusedConfigIndex) {
+                              scrollController.scrollToEnd();
+                            } else {
+                              scrollController.scrollUp(3);
+                            }
+                            rebuild();
+                            return true;
+                          case LogicalKey.arrowDown:
+                            state.updateFocusedConfig(1);
+                            if (state.focusedConfigIndex == 0) {
+                              scrollController.scrollToStart();
+                            } else {
+                              scrollController.scrollDown(3);
+                            }
+                            rebuild();
+                            return true;
+                        }
+                        return false;
+                      },
+                    );
+                  },
+                ),
+                if (config.suffixText case final suffix?)
+                  Padding(
+                    padding: EdgeInsets.only(top: config.maxLines / 2),
+                    child: Text(
+                      suffix,
+                      style: const TextStyle(color: Colors.gray),
+                    ),
+                  ),
+              ],
+            ),
+            ValueListenableBuilder<String?>(
+              valueListenable: controller.error,
+              builder: (context, error, child) {
+                if (error case final message?) {
+                  return Text(
+                    message,
+                    style: TextStyle(color: theme.errorLevel),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -215,33 +236,24 @@ class Form extends StatelessComponent {
     final selectedOption = state.getSelectedOptionFor(config);
     final focusedOptionIndex = state.getFocusedOptionIndexFor(config);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          config.label,
-          style: const TextStyle(
-            color: Color.defaultColor,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Wrap(
-          spacing: 2,
-          children: [
-            for (final option in config.options.indexed)
-              _buildConfigurationOption(
-                theme,
-                option.$2,
-                focused: configFocused && focusedOptionIndex == option.$1,
-                selected: selectedOption == option.$2,
-                onTap: () {
-                  state.updateSelectedOption(config, option.$2);
-                  rebuild();
-                },
-              ),
-          ],
-        ),
-      ],
+    return _buildConfigurationLayout(
+      config: config,
+      child: Wrap(
+        spacing: 2,
+        children: [
+          for (final option in config.options.indexed)
+            _buildConfigurationOption(
+              theme,
+              option.$2,
+              focused: configFocused && focusedOptionIndex == option.$1,
+              selected: selectedOption == option.$2,
+              onTap: () {
+                state.updateSelectedOption(config, option.$2);
+                rebuild();
+              },
+            ),
+        ],
+      ),
     );
   }
 
@@ -254,30 +266,21 @@ class Form extends StatelessComponent {
         state.getSelectedOptionFor(config) as BoolFormConfigOption?;
     const defaultOption = BoolFormConfigOption.enabled;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          config.label,
-          style: const TextStyle(
-            color: Color.defaultColor,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        _buildMultiSelectOption(
-          theme,
-          BoolFormConfigOption.enabled,
-          focused: configFocused,
-          selected: selectedOption == defaultOption,
-          onTap: () {
-            BoolFormConfigOption newOption = selectedOption == .enabled
-                ? .disabled
-                : .enabled;
-            state.updateSelectedOption(config, newOption);
-            rebuild();
-          },
-        ),
-      ],
+    return _buildConfigurationLayout(
+      config: config,
+      child: _buildMultiSelectOption(
+        theme,
+        BoolFormConfigOption.enabled,
+        focused: configFocused,
+        selected: selectedOption == defaultOption,
+        onTap: () {
+          BoolFormConfigOption newOption = selectedOption == .enabled
+              ? .disabled
+              : .enabled;
+          state.updateSelectedOption(config, newOption);
+          rebuild();
+        },
+      ),
     );
   }
 
@@ -289,33 +292,24 @@ class Form extends StatelessComponent {
     final selectedOptions = state.getSelectedOptionsFor(config) ?? {};
     final focusedOptionIndex = state.getFocusedOptionIndexFor(config);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          config.label,
-          style: const TextStyle(
-            color: Color.defaultColor,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Wrap(
-          spacing: 2,
-          children: [
-            for (final option in config.options.indexed)
-              _buildMultiSelectOption(
-                theme,
-                option.$2,
-                focused: configFocused && focusedOptionIndex == option.$1,
-                selected: selectedOptions.contains(option.$2),
-                onTap: () {
-                  state.updateSelectedOption(config, option.$2);
-                  rebuild();
-                },
-              ),
-          ],
-        ),
-      ],
+    return _buildConfigurationLayout(
+      config: config,
+      child: Wrap(
+        spacing: 2,
+        children: [
+          for (final option in config.options.indexed)
+            _buildMultiSelectOption(
+              theme,
+              option.$2,
+              focused: configFocused && focusedOptionIndex == option.$1,
+              selected: selectedOptions.contains(option.$2),
+              onTap: () {
+                state.updateSelectedOption(config, option.$2);
+                rebuild();
+              },
+            ),
+        ],
+      ),
     );
   }
 

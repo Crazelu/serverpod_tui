@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:nocterm/nocterm.dart';
+import 'package:serverpod_tui/src/serverpod_theme.dart';
 
 /// A radio button component.
 class RadioButton extends StatelessComponent {
@@ -12,13 +15,23 @@ class RadioButton extends StatelessComponent {
   final String label;
   final bool focused;
 
+  String get indicator {
+    if (Platform.isWindows || Platform.isLinux) {
+      return value ? '◉' : '○';
+    }
+    return value ? '●' : '○';
+  }
+
   @override
   Component build(BuildContext context) {
-    final indicator = value ? '◉' : '○';
+    final theme = ServerpodTheme.of(context);
 
     return Text(
-      '$indicator $label',
-      style: TextStyle(color: Color.defaultColor, reverse: focused),
+      ' $indicator $label ',
+      style: TextStyle(
+        color: Color.defaultColor,
+        backgroundColor: focused ? theme.activationKey : null,
+      ),
     );
   }
 }

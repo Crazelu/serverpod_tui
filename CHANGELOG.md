@@ -1,3 +1,7 @@
+## 0.1.0-rc.7
+
+Improved form UI and added support for optional description for form configurations.
+
 ## 0.1.0-rc.6
 
 Fixed buttons activating on Ctrl, Alt, and Meta key combinations so app-level shortcuts reach their handlers.

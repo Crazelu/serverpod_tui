@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:nocterm/nocterm.dart';
+import 'package:serverpod_tui/src/serverpod_theme.dart';
 
 /// A check box component
 class Checkbox extends StatelessComponent {
@@ -13,13 +16,23 @@ class Checkbox extends StatelessComponent {
   final bool value;
   final bool focused;
 
+  String get indicator {
+    if (Platform.isWindows || Platform.isLinux) {
+      return value ? '🞕' : '🞎';
+    }
+    return value ? '■' : '□';
+  }
+
   @override
   Component build(BuildContext context) {
-    final indicator = value ? '■' : '□';
+    final theme = ServerpodTheme.of(context);
 
     return Text(
-      '$indicator $label',
-      style: TextStyle(color: Color.defaultColor, reverse: focused),
+      ' $indicator $label ',
+      style: TextStyle(
+        color: Color.defaultColor,
+        backgroundColor: focused ? theme.activationKey : null,
+      ),
     );
   }
 }
