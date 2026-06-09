@@ -93,10 +93,10 @@ packages:
     dependency: "direct main"
     description:
       name: cli_tools
-      sha256: af507d13e9522e207aeacddb1fcb84814f36eed46dd536010d1ee78ef0f99449
+      sha256: "8d0a58801b1af1834b7ef2dca17779d5237d8b56e69d51a35d300a1aa2a3beba"
       url: "https://pub.dev"
     source: hosted
-    version: "0.11.0"
+    version: "0.13.1"
   clock:
     dependency: transitive
     description:
@@ -117,10 +117,10 @@ packages:
     dependency: transitive
     description:
       name: config
-      sha256: "7ab448e904baf3991878881be208b4298b2c1737852529238340dc780c575bda"
+      sha256: "62792099b28e05dfe5ef40c0263f548bd2f8d240ca4d084f9e095a03c93455b1"
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.4"
+    version: "0.9.0"
   convert:
     dependency: transitive
     description:
@@ -249,6 +249,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
+  isolated_object:
+    dependency: transitive
+    description:
+      name: isolated_object
+      sha256: b52bf712237ee196a3724e8467fe1ef9286842070c22fcd57e01455e1539ab8f
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   json_annotation:
     dependency: transitive
     description:
@@ -409,14 +417,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1"
-  serverpod_shared:
+  serverpod_logging:
     dependency: "direct main"
     description:
-      name: serverpod_shared
-      sha256: "74f1392fbd5c08d6649f856af4c34a3eceb133b0877dc995dc0aca069e39c5a4"
+      name: serverpod_logging
+      sha256: "177d3f53144f2811c2df01bb5134fae59db48129fac62efef11d12407feae6a7"
       url: "https://pub.dev"
     source: hosted
-    version: "3.5.0-beta.7"
+    version: "0.1.0"
   shelf:
     dependency: transitive
     description:

@@ -1,10 +1,10 @@
 import 'package:intl/intl.dart';
 import 'package:nocterm/nocterm.dart' hide LogEntry;
+import 'package:serverpod_logging/serverpod_logging.dart';
 import 'package:serverpod_tui/src/components/spinner.dart';
 import 'package:serverpod_tui/src/format_duration.dart';
 import 'package:serverpod_tui/src/serverpod_theme.dart';
 import 'package:serverpod_tui/src/state.dart';
-import 'package:serverpod_shared/log.dart';
 
 final _timeFormat = DateFormat('HH:mm:ss.SSS');
 

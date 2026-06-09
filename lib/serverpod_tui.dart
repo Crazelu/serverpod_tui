@@ -1,6 +1,5 @@
 export 'components.dart';
 export 'form.dart';
-export 'log.dart';
 export 'src/app_state_holder.dart';
 export 'src/app.dart';
 export 'src/bounded_queue_list.dart';

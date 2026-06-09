@@ -1,7 +1,7 @@
 import 'package:nocterm/nocterm.dart' hide LogEntry;
+import 'package:serverpod_logging/serverpod_logging.dart';
 import 'package:serverpod_tui/src/components/log_operation.dart';
 import 'package:serverpod_tui/src/state.dart';
-import 'package:serverpod_shared/log.dart';
 
 /// Renders structured log entries with active tracked operations
 /// stacked at the bottom.
