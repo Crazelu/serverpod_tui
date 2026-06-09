@@ -1,8 +1,9 @@
+import 'package:serverpod_tui/src/alert_message.dart';
 import 'package:serverpod_tui/src/bounded_queue_list.dart';
 
 /// Central state for the TUI, mutated by the backend and rendered by nocterm.
 abstract class TuiState {
-  /// Log history entries: [LogEntry] (from serverpod_shared) or
+  /// Log history entries: [LogEntry] (from serverpod_logging) or
   /// [CompletedOperation].
   BoundedQueueList<Object> get logHistory;
 
@@ -21,6 +22,13 @@ abstract class TuiState {
   /// "Copied to clipboard" after a copy or "Press Ctrl-C again to exit" while
   /// exit is armed. Null when nothing should be shown.
   String? ctrlCHint;
+
+  /// Alert pinned in the log panel until dismissed with Escape or replaced by
+  /// a newer alert. Rendered by the consumer via `AlertLine`.
+  AlertMessage? alert;
+
+  /// When [alert] was raised, shown alongside it. Null when unknown.
+  DateTime? alertTime;
 }
 
 /// A tracked operation (server session or CLI progress).

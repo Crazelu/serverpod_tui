@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:serverpod_tui/src/alert_message.dart';
 import 'package:serverpod_tui/src/app.dart';
+import 'package:serverpod_tui/src/clipboard.dart';
 import 'package:serverpod_tui/src/state.dart';
 import 'package:stream_transform/stream_transform.dart';
 
@@ -52,6 +54,17 @@ abstract class TuiAppStateHolder<S extends TuiState> {
   /// via a throttled stream; see [_rebuildInterval].
   @mustCallSuper
   void markDirty() => _dirtyController.add(null);
+
+  /// Shows [alert], replacing any previous one. A copyable segment is copied
+  /// to the clipboard immediately. [time] is shown alongside the alert.
+  void showAlert(AlertMessage alert, {DateTime? time}) {
+    state.alert = alert;
+    state.alertTime = time;
+    if (alert.copyText case final text?) {
+      copyToClipboard(text);
+    }
+    markDirty();
+  }
 
   /// Releases the dirty-event stream. The holder typically lives for
   /// the process lifetime, but tests that construct it directly
