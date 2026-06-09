@@ -1,6 +1,6 @@
+import 'package:serverpod_logging/serverpod_logging.dart';
 import 'package:serverpod_tui/src/state.dart';
 import 'package:serverpod_tui/src/log/tui_log_writer.dart';
-import 'package:serverpod_shared/log.dart';
 import 'package:test/test.dart';
 
 import '../util.dart';

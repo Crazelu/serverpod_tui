@@ -1,3 +1,7 @@
+## 0.1.0
+
+Replaced `serverpod_shared` dependency with `serverpod_logging`.
+
 ## 0.1.0-rc.7
 
 Improved form UI and added support for optional description for form configurations.
