@@ -93,10 +93,10 @@ packages:
     dependency: "direct main"
     description:
       name: cli_tools
-      sha256: "8d0a58801b1af1834b7ef2dca17779d5237d8b56e69d51a35d300a1aa2a3beba"
+      sha256: af507d13e9522e207aeacddb1fcb84814f36eed46dd536010d1ee78ef0f99449
       url: "https://pub.dev"
     source: hosted
-    version: "0.13.1"
+    version: "0.11.0"
   clock:
     dependency: transitive
     description:
@@ -117,10 +117,10 @@ packages:
     dependency: transitive
     description:
       name: config
-      sha256: "62792099b28e05dfe5ef40c0263f548bd2f8d240ca4d084f9e095a03c93455b1"
+      sha256: "7ab448e904baf3991878881be208b4298b2c1737852529238340dc780c575bda"
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.0"
+    version: "0.8.4"
   convert:
     dependency: transitive
     description:
