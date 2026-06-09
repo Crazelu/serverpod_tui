@@ -4,11 +4,6 @@
 - **FEAT**: Improved form UI
 - **CHORE**: Replaced `serverpod_shared` dependency with `serverpod_logging`.
 
-## 0.1.0-rc.7
-
-- **BREAKING** **FEAT**: Added support for optional description for form configurations.
-- **FEAT**: Improved form UI
-
 ## 0.1.0-rc.6
 
 - **FIX**: Fixed buttons activating on Ctrl, Alt, and Meta key combinations so app-level shortcuts reach their handlers.
