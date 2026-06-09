@@ -118,7 +118,9 @@ abstract class TuiAppState<S extends TuiApp> extends State<S> {
   }
 
   void dismissAlert() {
-    component.holder.state.alert = null;
+    final state = component.holder.state;
+    state.alert = null;
+    state.alertTime = null;
     rebuild();
   }
 

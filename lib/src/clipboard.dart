@@ -74,9 +74,8 @@ Future<bool> nativeCopy(
   for (final command in commands) {
     try {
       final process = await start(command.executable, command.arguments);
-      process.stdin
-        ..write(text)
-        ..close();
+      process.stdin.write(text);
+      await process.stdin.close();
       return true;
     } catch (_) {
       // Tool not installed or failed to start; try the next candidate.
