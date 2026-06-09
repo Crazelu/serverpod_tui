@@ -52,45 +52,18 @@ class _FakeStdin implements IOSink {
 }
 
 void main() {
-  group('Given the per-platform command list', () {
-    test('when on macOS then pbcopy is the only tool', () {
+  group('Given a macOS environment', () {
+    late _RecordingStarter starter;
+
+    setUp(() => starter = _RecordingStarter());
+
+    test('when calling clipboardCommandsFor then pbcopy is the only tool', () {
       final commands = clipboardCommandsFor('macos');
 
       expect(commands, hasLength(1));
       expect(commands.single.executable, 'pbcopy');
       expect(commands.single.arguments, isEmpty);
     });
-
-    test('when on Windows then clip is the only tool', () {
-      final commands = clipboardCommandsFor('windows');
-
-      expect(commands, hasLength(1));
-      expect(commands.single.executable, 'clip');
-    });
-
-    test('when on Linux then Wayland is tried before the X11 tools', () {
-      final commands = clipboardCommandsFor('linux');
-
-      expect(
-        commands.map((c) => c.executable),
-        ['wl-copy', 'xclip', 'xsel'],
-      );
-      expect(commands[1].arguments, ['-selection', 'clipboard']);
-      expect(commands[2].arguments, ['--clipboard', '--input']);
-    });
-
-    test('when on an unknown platform then the Linux tools are used', () {
-      expect(
-        clipboardCommandsFor('fuchsia').map((c) => c.executable),
-        ['wl-copy', 'xclip', 'xsel'],
-      );
-    });
-  });
-
-  group('Given a macOS environment', () {
-    late _RecordingStarter starter;
-
-    setUp(() => starter = _RecordingStarter());
 
     test('when copying then pbcopy is invoked', () async {
       final copied = await nativeCopy(
@@ -117,6 +90,13 @@ void main() {
   });
 
   group('Given a Windows environment', () {
+    test('when calling clipboardCommandsFor then clip is the only tool', () {
+      final commands = clipboardCommandsFor('windows');
+
+      expect(commands, hasLength(1));
+      expect(commands.single.executable, 'clip');
+    });
+
     test('when copying then clip is invoked with the text', () async {
       final starter = _RecordingStarter();
 
@@ -133,6 +113,21 @@ void main() {
   });
 
   group('Given a Linux environment', () {
+    test(
+      'when calling clipboardCommandsFor then Wayland is tried before the '
+      'X11 tools',
+      () {
+        final commands = clipboardCommandsFor('linux');
+
+        expect(
+          commands.map((c) => c.executable),
+          ['wl-copy', 'xclip', 'xsel'],
+        );
+        expect(commands[1].arguments, ['-selection', 'clipboard']);
+        expect(commands[2].arguments, ['--clipboard', '--input']);
+      },
+    );
+
     test(
       'when the first tool is available then no fallback is tried',
       () async {
@@ -193,5 +188,14 @@ void main() {
         expect(starter.startedExecutables, ['wl-copy', 'xclip', 'xsel']);
       },
     );
+  });
+
+  group('Given an unknown environment', () {
+    test('when calling clipboardCommandsFor then the Linux tools are used', () {
+      expect(
+        clipboardCommandsFor('fuchsia').map((c) => c.executable),
+        ['wl-copy', 'xclip', 'xsel'],
+      );
+    });
   });
 }

@@ -26,7 +26,7 @@ Future<String> _render(
 }
 
 void main() {
-  group('Given an alert with a copyable code', () {
+  group('Given an alert with a timestamp and a copyable code', () {
     late String line;
 
     setUp(() async {
@@ -50,22 +50,21 @@ void main() {
       expect(line.startsWith('alert'), isTrue);
     });
 
-    test('when a time is given then it shows in the log timestamp format', () {
+    test('when rendered then it shows in the log timestamp format', () {
       expect(line, contains('22:06:29.029'));
     });
   });
 
-  group('Given an alert without a time', () {
-    test(
-      'when rendered then the message follows the marker directly',
-      () async {
-        final line = await _render('Registration code: <h2k9x3mp>', width: 80);
+  test(
+    'Given an alert without a time when rendered then the message follows '
+    'the marker directly',
+    () async {
+      final line = await _render('Registration code: <h2k9x3mp>', width: 80);
 
-        // No timestamp column between the marker and the message.
-        expect(line, startsWith('alert Registration code:'));
-      },
-    );
-  });
+      // No timestamp column between the marker and the message.
+      expect(line, startsWith('alert Registration code:'));
+    },
+  );
 
   group('Given an alert without a code', () {
     late String line;

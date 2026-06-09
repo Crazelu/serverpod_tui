@@ -28,7 +28,9 @@ class TestStateHolder extends TuiAppStateHolder<TestState> {
   TuiAppState? _widgetState;
 
   @override
-  void attach(TuiAppState widgetState) => _widgetState = widgetState;
+  void attach(TuiAppState widgetState) {
+    _widgetState = widgetState;
+  }
 
   @override
   void detach(TuiAppState widgetState) {
