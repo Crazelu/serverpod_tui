@@ -1,4 +1,4 @@
-## 0.1.0
+## 0.2.0
 
 Replaced `serverpod_shared` dependency with `serverpod_logging`.
 
