@@ -1,4 +1,4 @@
-## Next
+## 0.2.1
 
 - **FEAT**: Added alert messages. `TuiAppStateHolder.showAlert` pins a copyable alert (e.g. an email verification code) in the log panel via `AlertLine`; a `<...>`-marked segment is copied to the clipboard and re-copied with `C`, and `Esc` dismisses it.
 - **FEAT**: Clipboard copies now use the native platform tool (`pbcopy`/`clip`/`wl-copy`/`xclip`/`xsel`) in addition to OSC 52, so copying works in terminals without OSC 52 support (e.g. macOS Terminal.app).
