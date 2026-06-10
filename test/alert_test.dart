@@ -59,26 +59,28 @@ void main() {
     });
   });
 
-  group('Given the clipboard was overwritten after an alert with a copyable '
-      'segment', () {
-    setUp(() async {
-      holder.showAlert(AlertMessage.parse('Registration code: <h2k9x3mp>'));
-      await _pump(tester);
-      ClipboardManager.copy('something else');
-    });
+  group(
+    'Given the clipboard was overwritten after an alert with a copyable segment',
+    () {
+      setUp(() async {
+        holder.showAlert(AlertMessage.parse('Registration code: <h2k9x3mp>'));
+        await _pump(tester);
+        ClipboardManager.copy('something else');
+      });
 
-    test('when C is pressed then the segment is copied again', () async {
-      await _sendKey(tester, LogicalKey.keyC);
+      test('when C is pressed then the segment is copied again', () async {
+        await _sendKey(tester, LogicalKey.keyC);
 
-      expect(ClipboardManager.paste(), 'h2k9x3mp');
-    });
+        expect(ClipboardManager.paste(), 'h2k9x3mp');
+      });
 
-    test('when C is pressed then a confirmation hint is shown', () async {
-      await _sendKey(tester, LogicalKey.keyC);
+      test('when C is pressed then a confirmation hint is shown', () async {
+        await _sendKey(tester, LogicalKey.keyC);
 
-      expect(state.ctrlCHint, 'Copied to clipboard');
-    });
-  });
+        expect(state.ctrlCHint, 'Copied to clipboard');
+      });
+    },
+  );
 
   group('Given an alert without a copyable segment', () {
     setUp(() async {

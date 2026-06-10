@@ -56,8 +56,9 @@ void main() {
   });
 
   test(
-    'Given an alert without a time when rendered then the message follows '
-    'the marker directly',
+    'Given an alert without a time '
+    'when rendered '
+    'then the message follows the marker directly',
     () async {
       final line = await _render('Registration code: <h2k9x3mp>', width: 80);
 
@@ -84,8 +85,9 @@ void main() {
   });
 
   test(
-    'Given an alert that fits the width when rendered then it shows in full '
-    'without an ellipsis',
+    'Given an alert that fits the width '
+    'when rendered '
+    'then it shows in full without an ellipsis',
     () async {
       final line = await _render(
         'Registration code: <h2k9x3mp>',

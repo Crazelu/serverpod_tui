@@ -114,8 +114,7 @@ void main() {
 
   group('Given a Linux environment', () {
     test(
-      'when calling clipboardCommandsFor then Wayland is tried before the '
-      'X11 tools',
+      'when calling clipboardCommandsFor then Wayland is tried before the X11 tools',
       () {
         final commands = clipboardCommandsFor('linux');
 
