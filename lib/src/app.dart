@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:nocterm/nocterm.dart';
 import 'package:serverpod_tui/src/app_state_holder.dart';
+import 'package:serverpod_tui/src/clipboard.dart';
 import 'package:serverpod_tui/src/components/spinner.dart';
 import 'package:serverpod_tui/src/run_app.dart';
 import 'package:serverpod_tui/src/serverpod_theme.dart';
@@ -72,7 +73,7 @@ abstract class TuiAppState<S extends TuiApp> extends State<S> {
     final state = component.holder.state;
 
     if (state.selectedText.isNotEmpty) {
-      ClipboardManager.copy(state.selectedText);
+      copyToClipboard(state.selectedText);
       // Consume the selection so the next Ctrl-C arms exit. The visual
       // highlight is dropped when the log views re-render (e.g. the hint
       // line shifts layout), so keeping the text would let later Ctrl-C
@@ -116,6 +117,42 @@ abstract class TuiAppState<S extends TuiApp> extends State<S> {
     _exitArmTimer?.cancel();
   }
 
+  void dismissAlert() {
+    final state = component.holder.state;
+    state.alert = null;
+    state.alertTime = null;
+    rebuild();
+  }
+
+  bool _handleKeyEvent(KeyboardEvent event) {
+    if (_handleCtrlC(event)) return true;
+    return _handleAlertKeys(event);
+  }
+
+  // Escape dismisses the alert; C re-copies its segment in case the clipboard
+  // has been overwritten since the alert appeared.
+  bool _handleAlertKeys(KeyboardEvent event) {
+    final alert = component.holder.state.alert;
+    if (alert == null) return false;
+
+    if (event.matches(LogicalKey.escape)) {
+      dismissAlert();
+      return true;
+    }
+
+    if (alert.copyText case final text?
+        when event.logicalKey == LogicalKey.keyC &&
+            !event.isControlPressed &&
+            !event.isAltPressed &&
+            !event.isMetaPressed) {
+      copyToClipboard(text);
+      _showHint('Copied to clipboard', autoClear: true);
+      return true;
+    }
+
+    return false;
+  }
+
   /// Describes the part of the user interface represented by this component.
   Component buildApp(BuildContext context);
 
@@ -134,12 +171,13 @@ abstract class TuiAppState<S extends TuiApp> extends State<S> {
             ),
             child: SpinnerScope(
               active: state.activeOperations.isNotEmpty,
-              // Ctrl-C is routed here as a keyboard event. The app's own key
-              // handlers run first (depth-first dispatch); only unhandled
-              // Ctrl-C bubbles up to this Focusable.
+              // Ctrl-C and the alert keys (Escape, C) are routed here as
+              // keyboard events. The app's own key handlers run first
+              // (depth-first dispatch); only unhandled keys bubble up to
+              // this Focusable.
               child: Focusable(
                 focused: true,
-                onKeyEvent: _handleCtrlC,
+                onKeyEvent: _handleKeyEvent,
                 child: _withCtrlCHint(context, buildApp(context)),
               ),
             ),
@@ -149,6 +187,9 @@ abstract class TuiAppState<S extends TuiApp> extends State<S> {
     );
   }
 
+  // The transient hint shown at the very bottom (e.g. "Copied to clipboard",
+  // "Press Ctrl-C again to exit"). The alert itself is rendered by the
+  // consumer via [AlertLine] - e.g. pinned inside the log panel.
   Component _withCtrlCHint(BuildContext context, Component child) {
     final hint = component.holder.state.ctrlCHint;
     final st = ServerpodTheme.of(context);

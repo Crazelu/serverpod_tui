@@ -1,6 +1,9 @@
 export 'components.dart';
 export 'form.dart';
+export 'src/alert_line.dart';
+export 'src/alert_message.dart';
 export 'src/app_state_holder.dart';
+export 'src/clipboard.dart';
 export 'src/app.dart';
 export 'src/bounded_queue_list.dart';
 export 'src/format_duration.dart';
