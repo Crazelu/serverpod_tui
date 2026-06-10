@@ -108,11 +108,13 @@ void main() {
     });
   });
 
-  test('Given no alert when Escape is pressed then the state is unchanged',
-      () async {
-    await _sendKey(tester, LogicalKey.escape);
+  test(
+    'Given no alert when Escape is pressed then the state is unchanged',
+    () async {
+      await _sendKey(tester, LogicalKey.escape);
 
-    expect(state.alert, isNull);
-    expect(state.ctrlCHint, isNull);
-  });
+      expect(state.alert, isNull);
+      expect(state.ctrlCHint, isNull);
+    },
+  );
 }

@@ -83,8 +83,10 @@ void main() {
     });
   });
 
-  group('Given an alert that fits the width', () {
-    test('when rendered then it shows in full without an ellipsis', () async {
+  test(
+    'Given an alert that fits the width when rendered then it shows in full '
+    'without an ellipsis',
+    () async {
       final line = await _render(
         'Registration code: <h2k9x3mp>',
         width: 80,
@@ -93,8 +95,8 @@ void main() {
 
       expect(line, contains('Registration code: h2k9x3mp'));
       expect(line, isNot(contains('…')));
-    });
-  });
+    },
+  );
 
   group('Given an alert wider than the width', () {
     late String line;
