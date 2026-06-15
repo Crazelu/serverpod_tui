@@ -232,8 +232,7 @@ void main() {
     );
 
     test(
-      'Given a first screen, '
-      'when buttons are activated using arrowDown '
+      'when buttons are activated using arrowDown on the first screen, '
       'and the Next button is activated using Space key, '
       'then it advances to the next screen',
       () async {
@@ -256,8 +255,7 @@ void main() {
     );
 
     test(
-      'Given a non-first screen, '
-      'when buttons are activated using arrowDown '
+      'when buttons are activated using arrowDown on a non-first screen, '
       'and the Back button is activated using Space key, '
       'then it goes back to the previous screen',
       () async {
