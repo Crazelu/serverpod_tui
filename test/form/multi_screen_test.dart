@@ -191,7 +191,7 @@ void main() {
     });
 
     test(
-      'when Enter is pressed on the first screen '
+      'when Enter is pressed on the first screen, '
       'then it advances to the next screen',
       () async {
         expect(state.currentScreenIndex, 0);
@@ -204,7 +204,7 @@ void main() {
     );
 
     test(
-      'when Escape is pressed on the first screen '
+      'when Escape is pressed on the first screen, '
       'then it stays on the first screen',
       () async {
         expect(state.currentScreenIndex, 0);
@@ -217,7 +217,7 @@ void main() {
     );
 
     test(
-      'when Escape is pressed on a non-first screen '
+      'when Escape is pressed on a non-first screen, '
       'then it goes back to the previous screen',
       () async {
         await _sendKey(tester, LogicalKey.enter);
@@ -278,7 +278,7 @@ void main() {
     );
 
     test(
-      'when navigating through all screens '
+      'when navigating through all screens, '
       'then the summary screen is reached',
       () async {
         final configCount = state.configScreenCount;
