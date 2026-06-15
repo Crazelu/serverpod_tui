@@ -117,9 +117,9 @@ enum IdeOption implements FormConfigOption {
   final String label;
 }
 
-class _InputConfigWithReq implements FormInputConfig {
+class _InputConfigWithSqliteRequirement implements FormInputConfig {
   @override
-  String get label => 'Input With Req';
+  String get label => 'Input With Requirement';
 
   @override
   int get maxLines => 1;
@@ -429,22 +429,6 @@ void main() {
     );
 
     test(
-      'when a FormInputConfig has an unsatisfied requirement, '
-      'then it is removed from the configurations list',
-      () {
-        final config = _InputConfigWithReq();
-        final stateWithReq = FormState(<FormConfig>[
-          TestConfig.database,
-          config,
-        ]);
-
-        // Default is postgres, but requirement needs sqlite → unsatisfied
-        expect(stateWithReq.configurations, hasLength(1));
-        expect(stateWithReq.configurations, isNot(contains(config)));
-      },
-    );
-
-    test(
       'when updating input for a FormInputConfig, '
       'then the internal TextEditingController is updated',
       () {
@@ -485,5 +469,40 @@ void main() {
         },
       );
     });
+  });
+
+  group('Given a FormState with a FormInputConfig containing requirements', () {
+    final config = _InputConfigWithSqliteRequirement();
+    late FormState state;
+
+    setUp(() {
+      state = FormState(<FormConfig>[
+        TestConfig.database,
+        config,
+      ]);
+    });
+
+    test(
+      'when the FormInputConfig has an unsatisfied requirement, '
+      'then it is removed from the configurations list',
+      () {
+        // Default is postgres, but requirement needs sqlite → unsatisfied
+        expect(state.configurations, hasLength(1));
+        expect(state.configurations, isNot(contains(config)));
+      },
+    );
+
+    test(
+      'when the FormInputConfig has all requirements satisfied, '
+      'then it is included in the configurations list',
+      () {
+        state.updateSelectedOption(
+          TestConfig.database,
+          DatabaseConfigOption.sqlite,
+        );
+        expect(state.configurations, hasLength(2));
+        expect(state.configurations, contains(config));
+      },
+    );
   });
 }
