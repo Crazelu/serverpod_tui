@@ -40,6 +40,61 @@ class FormScreenState extends State<FormScreen> {
               onActivate: (_) {},
             ),
             Button(
+              name: 'Navigate',
+              activationChar: '←↑↓→',
+              activationKeys: const [
+                LogicalKey.arrowLeft,
+                LogicalKey.arrowRight,
+                LogicalKey.arrowUp,
+                LogicalKey.arrowDown,
+              ],
+              onActivate: (key) {
+                switch (key) {
+                  case LogicalKey.arrowDown:
+                    formState.focusDown();
+                    if (formState.focusedConfigIndex == 0) {
+                      scrollController.scrollToStart();
+                    } else {
+                      scrollController.scrollDown(3);
+                    }
+                    setState(() {});
+                    break;
+                  case LogicalKey.arrowUp:
+                    formState.focusUp();
+                    if (formState.focusedConfigIndex ==
+                        formState.maxFocusedConfigIndex) {
+                      scrollController.scrollToEnd();
+                    } else {
+                      scrollController.scrollUp(3);
+                    }
+                    setState(() {});
+                    break;
+                  case LogicalKey.arrowLeft:
+                    formState.focusLeft();
+                    setState(() {});
+                    break;
+                  case LogicalKey.arrowRight:
+                    formState.focusRight();
+                    setState(() {});
+                    break;
+                  case LogicalKey.space:
+                    formState.onSelect();
+                    setState(() {});
+                    break;
+                }
+                setState(() {});
+              },
+            ),
+            Button(
+              name: 'Select',
+              activationChar: 'Space',
+              activationKeys: const [LogicalKey.space],
+              onActivate: (_) {
+                formState.onSelect();
+                setState(() {});
+              },
+            ),
+            Button(
               name: 'Quit',
               activationChar: 'Q',
               activationKeys: const [LogicalKey.keyQ],
