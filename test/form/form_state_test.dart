@@ -403,7 +403,7 @@ void main() {
     );
 
     test(
-      'when a required option is re-selected after being unselected, '
+      'when a required option is unselected and re-selected, '
       'then the dependent config reappears with default options',
       () {
         // Unselect the required option

@@ -296,7 +296,7 @@ void main() {
     );
 
     test(
-      'when on the summary screen and Space is pressed on the Back button '
+      'when navigating through all screens until the summary and pressing Space on the Back button, '
       'then it goes back to the previous screen',
       () async {
         for (var i = 0; i < state.configScreenCount; i++) {
