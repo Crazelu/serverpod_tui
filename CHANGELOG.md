@@ -1,3 +1,8 @@
+## 0.3.0
+
+- **FEAT**: Added multi screen form support.
+- **FIX**: Fixed form config requirements evaluation issue where reselecting a required config option did not bring back a previously constrained config.
+
 ## 0.2.1
 
 - **FEAT**: Added alert messages. `TuiAppStateHolder.showAlert` pins a copyable alert (e.g. an email verification code) in the log panel via `AlertLine`; a `<...>`-marked segment is copied to the clipboard and re-copied with `C`, and `Esc` dismisses it.
@@ -13,7 +18,7 @@
 
 - **FIX**: Fixed buttons activating on Ctrl, Alt, and Meta key combinations so app-level shortcuts reach their handlers.
 - **FIX**: Fixed the Ctrl-C hint toggling remounting the whole app subtree and resetting its state.
-- **FIX**: FFixed text selection getting swallowed up on Windows.
+- **FIX**: Fixed text selection getting swallowed up on Windows.
 
 ## 0.1.0-rc.5
 
