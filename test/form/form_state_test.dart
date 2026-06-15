@@ -117,6 +117,31 @@ enum IdeOption implements FormConfigOption {
   final String label;
 }
 
+class _InputConfigWithSqliteRequirement implements FormInputConfig {
+  @override
+  String get label => 'Input With Requirement';
+
+  @override
+  int get maxLines => 1;
+
+  @override
+  double get width => 10;
+
+  @override
+  String? get suffixText => '';
+
+  @override
+  FormDescription? get description => null;
+
+  @override
+  List<FormRequirement> get requirements => [
+    FormRequirement(
+      config: TestConfig.database,
+      configOption: DatabaseConfigOption.sqlite,
+    ),
+  ];
+}
+
 void main() {
   group('Given a FormState', () {
     late FormState state;
@@ -365,13 +390,41 @@ void main() {
           BoolFormConfigOption.enabled,
         );
 
-        // Select DatabaseConfigOption.none
-        state.updateFocusedConfigOption(2);
-        state.selectConfigOption();
+        // Unselect the required option
+        state.updateSelectedOption(
+          TestConfig.database,
+          DatabaseConfigOption.none,
+        );
 
         // auth config should no longer be in the configurations list
         expect(state.configurations, isNot(contains(TestConfig.auth)));
         expect(state.getSelectedOptionFor(TestConfig.auth), isNull);
+      },
+    );
+
+    test(
+      'when a required option is unselected and re-selected, '
+      'then the dependent config reappears with default options',
+      () {
+        // Unselect the required option
+        state.updateSelectedOption(
+          TestConfig.database,
+          DatabaseConfigOption.none,
+        );
+        expect(state.configurations, isNot(contains(TestConfig.auth)));
+
+        // Re-select the required option
+        state.updateSelectedOption(
+          TestConfig.database,
+          DatabaseConfigOption.postgres,
+        );
+
+        // auth config reappears with its default option
+        expect(state.configurations, contains(TestConfig.auth));
+        expect(
+          state.getSelectedOptionFor(TestConfig.auth),
+          BoolFormConfigOption.enabled,
+        );
       },
     );
 
@@ -416,5 +469,40 @@ void main() {
         },
       );
     });
+  });
+
+  group('Given a FormState with a FormInputConfig containing requirements', () {
+    final config = _InputConfigWithSqliteRequirement();
+    late FormState state;
+
+    setUp(() {
+      state = FormState(<FormConfig>[
+        TestConfig.database,
+        config,
+      ]);
+    });
+
+    test(
+      'when the FormInputConfig has an unsatisfied requirement, '
+      'then it is removed from the configurations list',
+      () {
+        // Default is postgres, but requirement needs sqlite → unsatisfied
+        expect(state.configurations, hasLength(1));
+        expect(state.configurations, isNot(contains(config)));
+      },
+    );
+
+    test(
+      'when the FormInputConfig has all requirements satisfied, '
+      'then it is included in the configurations list',
+      () {
+        state.updateSelectedOption(
+          TestConfig.database,
+          DatabaseConfigOption.sqlite,
+        );
+        expect(state.configurations, hasLength(2));
+        expect(state.configurations, contains(config));
+      },
+    );
   });
 }

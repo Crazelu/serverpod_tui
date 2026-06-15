@@ -3,9 +3,10 @@ import 'package:serverpod_tui/serverpod_tui.dart';
 import 'screens/form_screen.dart';
 import 'screens/loading_screen.dart';
 import 'screens/main_screen.dart';
+import 'screens/multi_form_screen.dart';
 import 'package:nocterm/nocterm.dart';
 
-enum Screen { loading, main, form }
+enum Screen { loading, main, form, multiForm }
 
 void main() {
   runTuiApp(const ExampleApp());
@@ -31,6 +32,8 @@ class _ExampleAppState extends State<ExampleApp> with TickerProviderStateMixin {
         screenComponent = MainScreen();
       case Screen.form:
         screenComponent = FormScreen();
+      case Screen.multiForm:
+        screenComponent = MultiFormScreen();
     }
 
     return NoctermApp(
@@ -45,7 +48,7 @@ class _ExampleAppState extends State<ExampleApp> with TickerProviderStateMixin {
               focused: true,
               onKeyEvent: (event) {
                 switch (event.logicalKey) {
-                  case LogicalKey.space:
+                  case LogicalKey.tab:
                     setState(() {
                       final nextIndex =
                           (_screen.index + 1) % Screen.values.length;

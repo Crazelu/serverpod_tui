@@ -35,6 +35,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Text('Press tab to switch screen or Esc to quit'),
           Logo(text: 'Serverpod'),
           Padding(
             padding: EdgeInsets.only(top: 3, bottom: 1),
@@ -45,7 +46,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
               ),
             ),
           ),
-          Text('Starting Docker'),
         ],
       ),
     );

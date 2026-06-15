@@ -11,6 +11,10 @@ class FormState {
     _updateState();
   }
 
+  /// Creates a [FormState] configured for a multi-screen `Form`.
+  factory FormState.multiScreen(List<FormConfig> configValues) =
+      MultiScreenFormState;
+
   /// Configurations used to initialize this state.
   final List<FormConfig> _configValues;
 
@@ -100,6 +104,21 @@ class FormState {
     }
   }
 
+  /// Moves focus to the previous element vertically.
+  void focusUp() => updateFocusedConfig(-1);
+
+  /// Moves focus to the next element vertically.
+  void focusDown() => updateFocusedConfig(1);
+
+  /// Moves focus to the next element horizontally.
+  void focusLeft() => updateFocusedConfigOption(-1);
+
+  /// Moves focus to the previous element horizontally.
+  void focusRight() => updateFocusedConfigOption(1);
+
+  /// Selects the element that is in focus.
+  void onSelect() => selectConfigOption();
+
   /// Updates the selected [FormSelectionConfig] for the focused [FormConfig].
   void selectConfigOption() {
     final config = configurations[_focusedConfigIndex];
@@ -154,7 +173,9 @@ class FormState {
 
   /// True when [req] is not satisfied given current selections.
   bool _isRequirementUnsatisfied(FormRequirement req) {
-    return getSelectedOptionFor(req.config) != req.configOption;
+    final selectedOptions = getSelectedOptionsFor(req.config);
+    if (selectedOptions == null) return true;
+    return !selectedOptions.contains(req.configOption);
   }
 
   /// Returns the focused option for [config].
@@ -213,6 +234,172 @@ class FormState {
       controller.dispose();
     }
     _inputState.clear();
+  }
+}
+
+/// State for a multi-screen `Form` component
+/// with support for screen navigation
+/// and focus management for Back/Next buttons.
+class MultiScreenFormState extends FormState {
+  MultiScreenFormState(super._configValues);
+
+  int _currentScreenIndex = 0;
+
+  /// Current screen index in multi-screen mode.
+  int get currentScreenIndex => _currentScreenIndex;
+
+  /// Number of config screens visible in the form.
+  int get configScreenCount => configurations.length;
+
+  /// Whether there is only one config screen.
+  bool get hasSingleScreen => configScreenCount <= 1;
+
+  /// Whether the current screen is the summary screen.
+  bool get isSummary => _currentScreenIndex >= configScreenCount;
+
+  bool _focusOnButton = false;
+
+  /// Whether the Back/Next buttons are focused in multi-screen mode.
+  bool get focusOnButton => _focusOnButton;
+
+  int _focusedButtonIndex = 0;
+
+  /// Index of the focused button (0 = Back, 1 = Next).
+  int get focusedButtonIndex => _focusedButtonIndex;
+
+  /// Unfocus form options.
+  void _unfocusOptions() {
+    _focusedConfigIndex = -1;
+  }
+
+  /// Moves focus to the back button in a multi-screen flow.
+  void focusBackButton() {
+    _unfocusOptions();
+    _focusOnButton = true;
+    _focusedButtonIndex = 0;
+  }
+
+  /// Moves focus to the next button in a multi-screen flow.
+  void focusNextButton() {
+    _unfocusOptions();
+    _focusOnButton = true;
+    _focusedButtonIndex = 1;
+  }
+
+  /// Moves focus to the next element vertically.
+  /// If buttons are not in focus in multi-screen flow,
+  /// then the focus is moved to the buttons.
+  @override
+  void focusDown() {
+    if (!_focusOnButton && !hasSingleScreen) {
+      if (isSummary || _currentScreenIndex > 0) {
+        focusBackButton();
+      } else if (!isSummary) {
+        focusNextButton();
+      }
+    }
+  }
+
+  /// Moves focus to the previous element vertically.
+  /// If buttons are in focus in multi-screen flow,
+  /// then the focus is moved to the form.
+  @override
+  void focusUp() {
+    if (_focusOnButton && !hasSingleScreen) {
+      _focusOnButton = false;
+      if (_currentScreenIndex < configurations.length) {
+        final config = configurations[_currentScreenIndex];
+        requestFocus(config);
+      }
+    }
+  }
+
+  /// Moves focus to the next element horizontally.
+  /// If buttons are in focus (only true in multi-screen flow),
+  /// then the focus is moved to the next button.
+  ///
+  /// If buttons are not in focus (form is focused),
+  /// the next form config option is focused.
+  @override
+  void focusRight() {
+    if (_focusOnButton) {
+      if (_focusedButtonIndex == 0 && !isSummary) {
+        focusNextButton();
+      }
+    } else if (_currentScreenIndex < configurations.length) {
+      final config = configurations[_currentScreenIndex];
+      requestFocus(config);
+      updateFocusedConfigOption(1);
+    }
+  }
+
+  /// Moves focus to the previous element horizontally.
+  /// If buttons are in focus (only true in multi-screen flow),
+  /// then the focus is moved to the previous button.
+  ///
+  /// If buttons are not in focus (form is focused),
+  /// the previous form config option is focused.
+  @override
+  void focusLeft() {
+    if (_focusOnButton) {
+      if (_focusedButtonIndex == 1 && _currentScreenIndex > 0) {
+        focusBackButton();
+      }
+    } else if (_currentScreenIndex < configurations.length) {
+      final config = configurations[_currentScreenIndex];
+      requestFocus(config);
+      updateFocusedConfigOption(-1);
+    }
+  }
+
+  /// Advances to the next screen in multi-screen mode.
+  void nextScreen() {
+    if (hasSingleScreen) return;
+    if (_currentScreenIndex < configScreenCount) {
+      _currentScreenIndex++;
+      _updateFormFocus();
+    }
+  }
+
+  /// Goes back to the previous screen in multi-screen mode.
+  void previousScreen() {
+    if (hasSingleScreen) return;
+    if (_currentScreenIndex > 0) {
+      _currentScreenIndex--;
+      _updateFormFocus();
+    }
+  }
+
+  /// Selects a focused button or form option.
+  /// If a button is focused, navigates to the previous/next screen.
+  /// Otherwise, if a form option is focused, selects it.
+  @override
+  void onSelect() {
+    if (_focusOnButton) {
+      switch (_focusedButtonIndex) {
+        case 0:
+          previousScreen();
+          break;
+        case 1:
+          nextScreen();
+          break;
+      }
+    } else {
+      selectConfigOption();
+    }
+  }
+
+  /// Focus form config for the current screen.
+  void _updateFormFocus() {
+    _focusOnButton = false;
+    if (_currentScreenIndex < configurations.length) {
+      final config = configurations[_currentScreenIndex];
+      requestFocus(config);
+      final currentFocus = getFocusedOptionIndexFor(config) ?? 0;
+      if (currentFocus > 0) {
+        updateFocusedConfigOption(-currentFocus);
+      }
+    }
   }
 }
 

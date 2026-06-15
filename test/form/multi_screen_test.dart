@@ -1,0 +1,382 @@
+import 'package:nocterm/nocterm.dart' hide isEmpty;
+import 'package:serverpod_tui/serverpod_tui.dart';
+import 'package:test/test.dart';
+
+import '../util.dart';
+
+// --- Test configs ---
+
+enum DatabaseOption implements FormConfigOption {
+  postgres('Postgres'),
+  sqlite('SQLite')
+  ;
+
+  const DatabaseOption(this.label);
+  @override
+  final String label;
+}
+
+enum SimpleConfig<T extends FormConfigOption>
+    implements FormSelectionConfig<T> {
+  database<DatabaseOption>(
+    label: 'Database',
+    options: DatabaseOption.values,
+    defaultOptions: {DatabaseOption.postgres},
+  ),
+  auth<BoolFormConfigOption>(
+    label: 'Authentication',
+    options: BoolFormConfigOption.values,
+    defaultOptions: {BoolFormConfigOption.enabled},
+  )
+  ;
+
+  const SimpleConfig({
+    required this.label,
+    required this.options,
+    required this.defaultOptions,
+    this.requirements = const [],
+    this.multiSelect = false,
+    this.description,
+  });
+
+  @override
+  final String label;
+  @override
+  final List<T> options;
+  @override
+  final Set<T> defaultOptions;
+  @override
+  final List<FormRequirement> requirements;
+  @override
+  final bool multiSelect;
+  @override
+  final FormDescription? description;
+}
+
+// --- Test app infrastructure ---
+
+class _MultiScreenTestState extends TuiState {
+  _MultiScreenTestState(this.formState);
+
+  final MultiScreenFormState formState;
+
+  @override
+  final logHistory = BoundedQueueList<Object>(TestState.maxLogEntries);
+
+  @override
+  final Map<String, TrackedOperation> activeOperations = {};
+}
+
+class _MultiScreenTestHolder extends TuiAppStateHolder<_MultiScreenTestState> {
+  _MultiScreenTestHolder(this._state);
+
+  final _MultiScreenTestState _state;
+  TuiAppState? _widgetState;
+
+  @override
+  _MultiScreenTestState get state => _state;
+
+  @override
+  TuiAppState? get widgetState => _widgetState;
+
+  @override
+  void attach(TuiAppState widgetState) {
+    _widgetState = widgetState;
+  }
+
+  @override
+  void detach(TuiAppState widgetState) {
+    if (_widgetState == widgetState) _widgetState = null;
+  }
+}
+
+class _MultiScreenTestApp extends TuiApp<_MultiScreenTestHolder> {
+  const _MultiScreenTestApp({required super.holder});
+
+  @override
+  TuiAppState<_MultiScreenTestApp> createState() => _MultiScreenTestAppState();
+}
+
+class _MultiScreenTestAppState extends TuiAppState<_MultiScreenTestApp> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Component buildApp(BuildContext context) {
+    final formState = component.holder.state.formState;
+
+    return Focusable(
+      focused: true,
+      onKeyEvent: (event) {
+        if (event.isControlPressed ||
+            event.isAltPressed ||
+            event.isMetaPressed) {
+          return false;
+        }
+        switch (event.logicalKey) {
+          case LogicalKey.enter:
+            if (formState.isSummary) {
+              return false;
+            }
+            formState.nextScreen();
+            component.holder.markDirty();
+            return true;
+          case LogicalKey.escape:
+            formState.previousScreen();
+            component.holder.markDirty();
+            return true;
+          case LogicalKey.arrowDown:
+            formState.focusDown();
+            component.holder.markDirty();
+            return true;
+          case LogicalKey.space:
+            formState.onSelect();
+            component.holder.markDirty();
+            return true;
+          case LogicalKey.arrowLeft:
+            formState.focusLeft();
+            component.holder.markDirty();
+            return true;
+          case LogicalKey.arrowRight:
+            formState.focusRight();
+            component.holder.markDirty();
+            return true;
+        }
+        return false;
+      },
+      child: Form.multiScreen(
+        state: formState,
+        scrollController: _scrollController,
+        rebuild: component.holder.markDirty,
+      ),
+    );
+  }
+}
+
+// --- Helpers ---
+
+Future<void> _sendKey(NoctermTester tester, LogicalKey key) {
+  return tester.sendKeyEvent(KeyboardEvent(logicalKey: key));
+}
+
+Future<void> _pump(NoctermTester tester) {
+  return tester.pump(const Duration(milliseconds: 100));
+}
+
+// --- Tests ---
+
+void main() {
+  group('Given a multi-screen form with multiple configs', () {
+    late NoctermTester tester;
+    late MultiScreenFormState state;
+    late _MultiScreenTestHolder holder;
+
+    setUp(() async {
+      state = MultiScreenFormState(SimpleConfig.values);
+      holder = _MultiScreenTestHolder(_MultiScreenTestState(state));
+      tester = await NoctermTester.create(size: const Size(80, 24));
+      await tester.pumpComponent(
+        _MultiScreenTestApp(holder: holder),
+      );
+    });
+
+    tearDown(() async {
+      tester.dispose();
+      await holder.dispose();
+    });
+
+    test(
+      'when Enter is pressed on the first screen, '
+      'then it advances to the next screen',
+      () async {
+        expect(state.currentScreenIndex, 0);
+
+        await _sendKey(tester, LogicalKey.enter);
+        await _pump(tester);
+
+        expect(state.currentScreenIndex, 1);
+      },
+    );
+
+    test(
+      'when Escape is pressed on the first screen, '
+      'then it stays on the first screen',
+      () async {
+        expect(state.currentScreenIndex, 0);
+
+        await _sendKey(tester, LogicalKey.escape);
+        await _pump(tester);
+
+        expect(state.currentScreenIndex, 0);
+      },
+    );
+
+    test(
+      'when Escape is pressed on a non-first screen, '
+      'then it goes back to the previous screen',
+      () async {
+        await _sendKey(tester, LogicalKey.enter);
+        await _pump(tester);
+        expect(state.currentScreenIndex, 1);
+
+        await _sendKey(tester, LogicalKey.escape);
+        await _pump(tester);
+
+        expect(state.currentScreenIndex, 0);
+      },
+    );
+
+    test(
+      'when buttons are activated using arrowDown on the first screen, '
+      'and the Next button is activated using Space key, '
+      'then it advances to the next screen',
+      () async {
+        await _pump(tester);
+        expect(state.currentScreenIndex, 0);
+
+        // Focus on Next button.
+        // Back button is disabled on the first screen
+        await _sendKey(tester, LogicalKey.arrowDown);
+        await _pump(tester);
+        expect(state.focusOnButton, isTrue);
+        expect(state.focusedButtonIndex, 1);
+
+        // Space to press Next button
+        await _sendKey(tester, LogicalKey.space);
+        await _pump(tester);
+
+        expect(state.currentScreenIndex, 1);
+      },
+    );
+
+    test(
+      'when buttons are activated using arrowDown on a non-first screen, '
+      'and the Back button is activated using Space key, '
+      'then it goes back to the previous screen',
+      () async {
+        await _sendKey(tester, LogicalKey.enter);
+        await _pump(tester);
+        expect(state.currentScreenIndex, 1);
+
+        // Focus on buttons. Back button is focused
+        await _sendKey(tester, LogicalKey.arrowDown);
+        await _pump(tester);
+        expect(state.focusOnButton, isTrue);
+        expect(state.focusedButtonIndex, 0);
+
+        // Space to press back button
+        await _sendKey(tester, LogicalKey.space);
+        await _pump(tester);
+
+        expect(state.currentScreenIndex, 0);
+      },
+    );
+
+    test(
+      'when navigating through all screens, '
+      'then the summary screen is reached',
+      () async {
+        final configCount = state.configScreenCount;
+
+        for (var i = 0; i < configCount; i++) {
+          expect(state.isSummary, isFalse);
+          expect(state.currentScreenIndex, i);
+          await _sendKey(tester, LogicalKey.enter);
+          await _pump(tester);
+        }
+
+        expect(state.isSummary, isTrue);
+        expect(state.currentScreenIndex, configCount);
+      },
+    );
+
+    test(
+      'when navigating through all screens until the summary and pressing Space on the Back button, '
+      'then it goes back to the previous screen',
+      () async {
+        for (var i = 0; i < state.configScreenCount; i++) {
+          await _sendKey(tester, LogicalKey.enter);
+          await _pump(tester);
+        }
+        expect(state.currentScreenIndex, state.configScreenCount);
+        expect(state.isSummary, isTrue);
+
+        // Focus on buttons
+        await _sendKey(tester, LogicalKey.arrowDown);
+        await _pump(tester);
+
+        // Space to press back button
+        await _sendKey(tester, LogicalKey.space);
+        await _pump(tester);
+
+        expect(state.currentScreenIndex, state.configScreenCount - 1);
+        expect(state.isSummary, isFalse);
+      },
+    );
+  });
+
+  group('Given a multi-screen form with a single config', () {
+    late NoctermTester tester;
+    late MultiScreenFormState state;
+    late _MultiScreenTestHolder holder;
+
+    setUp(() async {
+      state = MultiScreenFormState([SimpleConfig.database]);
+      holder = _MultiScreenTestHolder(_MultiScreenTestState(state));
+      tester = await NoctermTester.create(size: const Size(80, 24));
+      await tester.pumpComponent(
+        _MultiScreenTestApp(holder: holder),
+      );
+    });
+
+    tearDown(() async {
+      tester.dispose();
+      await holder.dispose();
+    });
+
+    test('then hasSingleScreen is true', () {
+      expect(state.hasSingleScreen, isTrue);
+    });
+
+    test(
+      'when arrowDown is pressed, '
+      'then the buttons are not focused',
+      () async {
+        await _sendKey(tester, LogicalKey.arrowDown);
+        await _pump(tester);
+
+        expect(state.focusOnButton, isFalse);
+        expect(state.currentScreenIndex, 0);
+      },
+    );
+
+    test(
+      'when Enter is pressed, '
+      'then the screen index does not change',
+      () async {
+        await _sendKey(tester, LogicalKey.enter);
+        await _pump(tester);
+
+        expect(state.currentScreenIndex, 0);
+        expect(state.isSummary, isFalse);
+      },
+    );
+
+    test(
+      'when escape is pressed, '
+      'then the screen index does not change',
+      () async {
+        await _sendKey(tester, LogicalKey.escape);
+        await _pump(tester);
+
+        expect(state.currentScreenIndex, 0);
+        expect(state.isSummary, isFalse);
+      },
+    );
+  });
+}
