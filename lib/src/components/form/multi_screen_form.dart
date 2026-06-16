@@ -135,6 +135,7 @@ class _MultiScreenNavigationButtons extends StatelessComponent {
             },
             focused: state.focusOnButton && state.focusedButtonIndex == 1,
           ),
+          const SizedBox(width: 1),
         ],
       ),
     );
