@@ -1,8 +1,8 @@
-## 0.3.1
+## 0.4.0
 
 - **FIX**: Removed excessive whitespace from multi screen form summary.
 - **FIX**: Added right padding to multi screen form navigation buttons.
-- **CHORE**: Removed `FormState.multiScreen` constructor which did not enforce the requirement of `MultiScreenFormState` by `Form.multiScreen`.
+- **FIX**: Removed `FormState.multiScreen` constructor which did not enforce the requirement of `MultiScreenFormState` by `Form.multiScreen`.
 
 ## 0.3.0
 
