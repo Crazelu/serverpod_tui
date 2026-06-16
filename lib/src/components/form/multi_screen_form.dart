@@ -135,6 +135,7 @@ class _MultiScreenNavigationButtons extends StatelessComponent {
             },
             focused: state.focusOnButton && state.focusedButtonIndex == 1,
           ),
+          const SizedBox(width: 1),
         ],
       ),
     );
@@ -168,13 +169,8 @@ class _SummaryScreen extends StatelessComponent {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 1),
                   for (final config in configs)
-                    _SummaryItem(
-                      state: state,
-                      config: config,
-                    ),
-                  const SizedBox(height: 1),
+                    _SummaryItem(state: state, config: config),
                   if (description case String description) ...[
                     const SizedBox(height: 1),
                     Text(
