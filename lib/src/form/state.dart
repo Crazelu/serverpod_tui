@@ -11,10 +11,6 @@ class FormState {
     _updateState();
   }
 
-  /// Creates a [FormState] configured for a multi-screen `Form`.
-  factory FormState.multiScreen(List<FormConfig> configValues) =
-      MultiScreenFormState;
-
   /// Configurations used to initialize this state.
   final List<FormConfig> _configValues;
 
