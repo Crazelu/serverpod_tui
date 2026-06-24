@@ -2,6 +2,7 @@
 
 - **FEAT**: Improved `HelpOverlay` UI.
 - **FEAT**: Improved spacing in `TabBar`.
+- **CHORE**: Upgraded `nocterm` to `^0.8.0` (Windows input/path fixes, IME and layout fixes).
 
 ## 0.4.0
 
