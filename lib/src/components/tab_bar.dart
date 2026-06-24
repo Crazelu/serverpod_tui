@@ -41,8 +41,6 @@ class TabBar extends StatelessComponent {
       _TabSpacingType spacingType;
       if (i == selectedTab) {
         spacingType = _TabSpacingType.shortLeft;
-      } else if (i == selectedTab - 1) {
-        spacingType = _TabSpacingType.shortRight;
       } else {
         spacingType = _TabSpacingType.full;
       }

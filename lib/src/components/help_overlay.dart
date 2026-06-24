@@ -11,10 +11,20 @@ const _keyColumnWidth = 24.0;
 /// Help overlay showing all keybindings. Sizes to its content; scrolls if
 /// content exceeds the available terminal height.
 class HelpOverlay extends StatefulComponent {
-  const HelpOverlay({super.key, required this.bindings, this.controller});
+  const HelpOverlay({
+    super.key,
+    required this.bindings,
+    required this.closeKey,
+    this.controller,
+  });
 
   final HelpOverlayBindings bindings;
   final ScrollController? controller;
+
+  /// The key for dismissing this overlay.
+  /// This is only displayed. Users should listen for the key event
+  /// and to dismiss the overlay.
+  final String closeKey;
 
   @override
   State<StatefulComponent> createState() => _HelpOverlayState();
@@ -50,11 +60,14 @@ class _HelpOverlayState extends State<HelpOverlay> {
             color: theme.surface,
             border: BoxBorder.all(
               style: BoxBorderStyle.rounded,
-              color: st.primary,
+              color: st.activationKey,
             ),
             title: BorderTitle(
               text: 'Help',
-              style: TextStyle(color: st.primary),
+              style: TextStyle(
+                color: st.activationKey,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           child: Column(
@@ -68,11 +81,12 @@ class _HelpOverlayState extends State<HelpOverlay> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SizedBox(height: 1),
                     for (final (section, items) in component.bindings) ...[
                       Text(
                         section,
                         style: TextStyle(
-                          color: st.primary,
+                          color: theme.onSurface,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -83,7 +97,7 @@ class _HelpOverlayState extends State<HelpOverlay> {
                             SizedBox(
                               width: _keyColumnWidth,
                               child: Text(
-                                '  $key',
+                                key,
                                 style: TextStyle(
                                   color: theme.onSurface,
                                   fontWeight: FontWeight.dim,
@@ -102,11 +116,23 @@ class _HelpOverlayState extends State<HelpOverlay> {
                 ),
               ),
               const SizedBox(height: 1),
-              Text(
-                'Press H or Esc to close',
-                style: TextStyle(
-                  color: theme.onSurface,
-                  fontWeight: FontWeight.dim,
+              RichText(
+                text: TextSpan(
+                  text: 'Press ',
+                  style: TextStyle(
+                    color: theme.onSurface,
+                    fontWeight: FontWeight.dim,
+                  ),
+                  children: [
+                    TextSpan(
+                      text: component.closeKey,
+                      style: TextStyle(
+                        color: st.activationKey,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(text: ' to close'),
+                  ],
                 ),
               ),
             ],
