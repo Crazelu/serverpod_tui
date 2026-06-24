@@ -1,3 +1,8 @@
+## 0.5.0
+
+- **FEAT**: Improved `HelpOverlay` UI.
+- **FEAT**: Improved spacing in `TabBar`.
+
 ## 0.4.0
 
 - **FIX**: Removed excessive whitespace from multi screen form summary.
