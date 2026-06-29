@@ -5,14 +5,14 @@ import 'package:serverpod_tui/src/form/config_option.dart';
 class FormRequirement<T extends FormConfigOption> {
   const FormRequirement({
     required this.config,
-    required this.configOption,
+    required this.configOptions,
   });
 
   /// The required config.
   /// The selected option for this config
-  /// must be [configOption] for the requirement to be satisfied.
+  /// must be in [configOptions] for the requirement to be satisfied.
   final FormConfig<T> config;
 
-  /// The option for [config] that must be satisified.
-  final T configOption;
+  /// The options for [config] that must be satisified.
+  final Set<T> configOptions;
 }

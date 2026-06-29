@@ -167,7 +167,7 @@ enum SelectionConfig<T extends FormConfigOption>
     requirements: [
       FormRequirement(
         config: SelectionConfig.database,
-        configOption: DatabaseConfigOption.postgres,
+        configOptions: {DatabaseConfigOption.postgres},
       ),
     ],
   ),
