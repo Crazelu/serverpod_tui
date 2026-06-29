@@ -10,6 +10,6 @@ class Tip extends StatelessComponent {
   @override
   Component build(BuildContext context) {
     final theme = ServerpodTheme.of(context);
-    return Text('💡 Tip: $tip', style: TextStyle(color: theme.brightText));
+    return Text('💡 $tip', style: TextStyle(color: theme.brightText));
   }
 }
