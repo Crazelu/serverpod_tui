@@ -237,9 +237,6 @@ class _SummaryItem extends StatelessComponent {
     return switch (config) {
       FormInputConfig config => state.getInputFor(config) ?? '',
       FormSelectionConfig config => _getSelectionValue(config),
-      _ => throw UnimplementedError(
-        'Missing implementation for config: $config',
-      ),
     };
   }
 }
