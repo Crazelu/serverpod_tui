@@ -1,3 +1,9 @@
+## 0.7.0
+
+- **FEAT**: Added per-tab status indicators to `TabBar` via a new `TabActivity` enum and `states` parameter (running / loading / stopped).
+- **FIX**: Aligned the active operation (launch spinner) line flush-left with a single space so it matches the log text on both the server and Flutter tabs.
+- **FIX**: Restyled `AlertLine` copy/dismiss hints to match the command bar (unbracketed, capitalized, command colors).
+
 ## 0.6.0
 
 - **FEAT**: Added multiple config options support for form requirement.
