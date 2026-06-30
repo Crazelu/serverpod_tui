@@ -171,7 +171,7 @@ class FormState {
   bool _isRequirementUnsatisfied(FormRequirement req) {
     final selectedOptions = getSelectedOptionsFor(req.config);
     if (selectedOptions == null) return true;
-    return !selectedOptions.contains(req.configOption);
+    return selectedOptions.intersection(req.configOptions).isEmpty;
   }
 
   /// Returns the focused option for [config].

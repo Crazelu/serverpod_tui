@@ -2,7 +2,7 @@ import 'package:serverpod_tui/src/form/config_option.dart';
 import 'package:serverpod_tui/src/form/requirement.dart';
 
 /// Base configuration for a form.
-abstract interface class FormConfig<T extends FormConfigOption> {
+sealed class FormConfig<T extends FormConfigOption> {
   /// UI visible label for this config.
   String get label;
 

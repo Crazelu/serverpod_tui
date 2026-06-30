@@ -50,7 +50,7 @@ enum TestConfig<T extends FormConfigOption> implements FormSelectionConfig<T> {
     requirements: [
       FormRequirement(
         config: TestConfig.database,
-        configOption: DatabaseConfigOption.postgres,
+        configOptions: {DatabaseConfigOption.postgres},
       ),
     ],
   ),
@@ -137,7 +137,7 @@ class _InputConfigWithSqliteRequirement implements FormInputConfig {
   List<FormRequirement> get requirements => [
     FormRequirement(
       config: TestConfig.database,
-      configOption: DatabaseConfigOption.sqlite,
+      configOptions: {DatabaseConfigOption.sqlite},
     ),
   ];
 }

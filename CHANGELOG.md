@@ -1,3 +1,10 @@
+## 0.6.0
+
+- **FEAT**: Added multiple config options support for form requirement.
+- **FIX**: Enabled scroll for multi form summary.
+- **CHORE**: Marked `FormConfig` as sealed for exhaustive pattern matching.
+- **CHORE**: Removed redundant "Tip" text from `Tip` component.
+
 ## 0.5.0
 
 - **FEAT**: Improved `HelpOverlay` UI.

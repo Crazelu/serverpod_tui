@@ -44,6 +44,7 @@ class MultiScreenForm extends Form {
         rebuild: rebuild,
         padding: padding,
         description: summaryDescription,
+        scrollController: scrollController,
       );
     }
 
@@ -147,12 +148,14 @@ class _SummaryScreen extends StatelessComponent {
     required this.state,
     required this.rebuild,
     required this.padding,
+    required this.scrollController,
     this.description,
   });
 
   final MultiScreenFormState state;
   final VoidCallback rebuild;
   final EdgeInsets padding;
+  final ScrollController scrollController;
   final String? description;
 
   @override
@@ -163,25 +166,30 @@ class _SummaryScreen extends StatelessComponent {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: padding,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (final config in configs)
-                    _SummaryItem(state: state, config: config),
-                  if (description case String description) ...[
-                    const SizedBox(height: 1),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        color: Color.defaultColor,
-                        fontWeight: FontWeight.dim,
+          child: Scrollbar(
+            controller: scrollController,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: Padding(
+                padding: padding,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (final config in configs)
+                      _SummaryItem(state: state, config: config),
+                    if (description case String description) ...[
+                      const SizedBox(height: 1),
+                      Text(
+                        description,
+                        style: TextStyle(
+                          color: Color.defaultColor,
+                          fontWeight: FontWeight.dim,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
@@ -237,9 +245,6 @@ class _SummaryItem extends StatelessComponent {
     return switch (config) {
       FormInputConfig config => state.getInputFor(config) ?? '',
       FormSelectionConfig config => _getSelectionValue(config),
-      _ => throw UnimplementedError(
-        'Missing implementation for config: $config',
-      ),
     };
   }
 }

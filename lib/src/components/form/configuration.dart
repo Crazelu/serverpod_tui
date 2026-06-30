@@ -90,9 +90,6 @@ class FormConfiguration extends StatelessComponent {
         onArrowDown: onFormInputArrowDown,
       ),
       FormSelectionConfig config => _buildFormSelectionConfig(config),
-      _ => throw UnimplementedError(
-        'Missing implementation for config: $config',
-      ),
     };
   }
 
