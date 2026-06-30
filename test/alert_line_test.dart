@@ -42,8 +42,13 @@ void main() {
     });
 
     test('when rendered then the copy and dismiss hints are shown', () {
-      expect(line, contains('copy'));
-      expect(line, contains('dismiss'));
+      expect(line, contains('Copy'));
+      expect(line, contains('Dismiss'));
+    });
+
+    test('when rendered then the key hints are not bracketed', () {
+      expect(line, isNot(contains('[C]')));
+      expect(line, isNot(contains('[Esc]')));
     });
 
     test('when rendered then it is left-aligned with the alert marker', () {
@@ -76,11 +81,11 @@ void main() {
 
     test('when rendered then the message and dismiss hint are shown', () {
       expect(line, contains('Server requires a restart'));
-      expect(line, contains('dismiss'));
+      expect(line, contains('Dismiss'));
     });
 
     test('when rendered then no copy hint is shown', () {
-      expect(line, isNot(contains('copy')));
+      expect(line, isNot(contains('Copy')));
     });
   });
 
