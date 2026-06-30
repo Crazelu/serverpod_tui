@@ -7,13 +7,14 @@ enum TabActivity {
   /// No indicator.
   none,
 
-  /// A solid green dot.
+  /// A dot in the theme's success color.
   running,
 
-  /// An animated spinner.
+  /// A spinner; animated when a [SpinnerScope] ancestor is present, otherwise a
+  /// static fallback glyph.
   loading,
 
-  /// A solid red square.
+  /// A square in the theme's failure color.
   stopped,
 }
 
