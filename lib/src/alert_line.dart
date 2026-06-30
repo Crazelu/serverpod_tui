@@ -7,7 +7,7 @@ final _timeFormat = DateFormat('HH:mm:ss.SSS');
 
 /// Renders an [AlertMessage] as a pinned, log-styled line: an `alert` marker
 /// and timestamp aligned with the log entries' level/time columns, followed by
-/// the message (with its code emphasised) and `C copy` / `Esc close` hints.
+/// the message (with its code emphasised) and `C Copy` / `Esc Dismiss` hints.
 ///
 /// The message is left-truncated (keeping the trailing code) when it doesn't
 /// fit, so the line never wraps. Place it where it should appear - e.g. pinned
@@ -64,13 +64,18 @@ class AlertLine extends StatelessComponent {
   List<Component> _messageSpans(ServerpodThemeData st, int maxWidth) {
     final code = alert.copyText;
 
-    // (text, isKey) pairs for the trailing action hints. The keys are
-    // bracketed so they read as prominent keycaps.
-    final hints = <(String, bool)>[
-      (' · ', false),
-      if (code != null) ...[('[C]', true), (' copy ', false)],
-      ('[Esc]', true),
-      (' dismiss', false),
+    final keyStyle = TextStyle(
+      color: st.activationKey,
+      fontWeight: FontWeight.bold,
+    );
+    final labelStyle = TextStyle(color: st.brightText);
+    final separatorStyle = TextStyle(color: st.subtleDivider);
+
+    final hints = <(String, TextStyle)>[
+      (' · ', separatorStyle),
+      if (code != null) ...[('C', keyStyle), (' Copy  ', labelStyle)],
+      ('Esc', keyStyle),
+      (' Dismiss', labelStyle),
     ];
     final hintsWidth = hints.fold<int>(0, (w, h) => w + h.$1.length);
 
@@ -97,14 +102,7 @@ class AlertLine extends StatelessComponent {
 
     return [
       ...messageSpans,
-      for (final (text, isKey) in hints)
-        Text(
-          text,
-          style: TextStyle(
-            color: isKey ? st.activationKey : st.subtleDivider,
-            fontWeight: isKey ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
+      for (final (text, style) in hints) Text(text, style: style),
     ];
   }
 
