@@ -2,72 +2,78 @@ import 'package:nocterm/nocterm.dart';
 import 'package:serverpod_tui/serverpod_tui.dart';
 import 'package:test/test.dart';
 
-/// Renders a [TabBar] and returns the full rendered text. When [withSpinner] is
-/// set, the bar is wrapped in a [SpinnerScope] so loading tabs animate (a bare
-/// [SpinnerIcon] falls back to a static glyph without one).
-Future<String> _render(
-  List<String> labels,
-  List<TabActivity> states, {
-  int selectedTab = 0,
-  int width = 60,
-  bool withSpinner = false,
-}) async {
-  final tester = await NoctermTester.create(size: Size(width.toDouble(), 4));
-  try {
-    Component tabBar = TabBar(
-      labels: labels,
-      states: states,
-      selectedTab: selectedTab,
-      onTabChanged: (_) {},
-    );
-    if (withSpinner) {
-      tabBar = SpinnerScope(active: true, child: tabBar);
-    }
-    await tester.pumpComponent(tabBar);
-    return tester.terminalState.getText();
-  } finally {
-    tester.dispose();
-  }
-}
-
 void main() {
+  // NoctermTestBinding is a process-wide singleton, so every test must
+  // dispose its tester before the next one can call NoctermTester.create.
+  late NoctermTester tester;
+  tearDown(() => tester.dispose());
+
   group('Given tabs with activity states', () {
     test('when a tab is running then a dot precedes its label', () async {
-      final text = await _render(
-        ['Server logs', 'app'],
-        [TabActivity.none, TabActivity.running],
+      tester = await NoctermTester.create(size: const Size(60, 4));
+      await tester.pumpComponent(
+        TabBar(
+          labels: const ['Server logs', 'app'],
+          states: const [TabActivity.none, TabActivity.running],
+          selectedTab: 0,
+          onTabChanged: (_) {},
+        ),
       );
 
-      expect(text, contains('● app'));
+      expect(tester.terminalState.getText(), contains('● app'));
     });
 
     test(
       'when a tab is stopped then an empty circle precedes its label',
       () async {
-        final text = await _render(
-          ['Server logs', 'app'],
-          [TabActivity.none, TabActivity.stopped],
+        tester = await NoctermTester.create(size: const Size(60, 4));
+        await tester.pumpComponent(
+          TabBar(
+            labels: const ['Server logs', 'app'],
+            states: const [TabActivity.none, TabActivity.stopped],
+            selectedTab: 0,
+            onTabChanged: (_) {},
+          ),
         );
 
-        expect(text, contains('○ app'));
+        expect(tester.terminalState.getText(), contains('○ app'));
       },
     );
 
     test('when a tab is loading then a spinner precedes its label', () async {
-      final text = await _render(
-        ['Server logs', 'app'],
-        [TabActivity.none, TabActivity.loading],
-        withSpinner: true,
+      tester = await NoctermTester.create(size: const Size(60, 4));
+      // Wrap in a SpinnerScope so the loading frame animates; a bare
+      // SpinnerIcon falls back to a static glyph without one.
+      await tester.pumpComponent(
+        SpinnerScope(
+          active: true,
+          child: TabBar(
+            labels: const ['Server logs', 'app'],
+            states: const [TabActivity.none, TabActivity.loading],
+            selectedTab: 0,
+            onTabChanged: (_) {},
+          ),
+        ),
       );
 
+      final text = tester.terminalState.getText();
       // A braille spinner frame, not the solid running/stopped glyphs.
       expect(text, contains('⠋ app'));
       expect(text, isNot(contains('● app')));
     });
 
     test('when a tab has no activity then no indicator precedes it', () async {
-      final text = await _render(['Server logs'], [TabActivity.none]);
+      tester = await NoctermTester.create(size: const Size(60, 4));
+      await tester.pumpComponent(
+        TabBar(
+          labels: const ['Server logs'],
+          states: const [TabActivity.none],
+          selectedTab: 0,
+          onTabChanged: (_) {},
+        ),
+      );
 
+      final text = tester.terminalState.getText();
       expect(text, isNot(contains('●')));
       expect(text, isNot(contains('○')));
     });
@@ -78,11 +84,17 @@ void main() {
     'when rendered '
     'then tabs without a state get no indicator',
     () async {
-      final text = await _render(
-        ['Server logs', 'app'],
-        [TabActivity.running],
+      tester = await NoctermTester.create(size: const Size(60, 4));
+      await tester.pumpComponent(
+        TabBar(
+          labels: const ['Server logs', 'app'],
+          states: const [TabActivity.running],
+          selectedTab: 0,
+          onTabChanged: (_) {},
+        ),
       );
 
+      final text = tester.terminalState.getText();
       expect(text, contains('● Server logs'));
       // The second tab has no corresponding state, so no indicator is drawn.
       expect(text, isNot(contains('● app')));
