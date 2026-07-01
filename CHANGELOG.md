@@ -1,8 +1,8 @@
 ## 0.7.0
 
-- **FEAT**: Added per-tab status indicators to `TabBar` via a new `TabActivity` enum and `states` parameter (running / loading / stopped).
+- **FEAT**: Added per-tab status indicators to `TabBar` via a new `TabActivity` enum and `states` parameter, plus a reusable `TabActivityIndicator` widget: running (`●`), loading (spinner), stopped (`○`).
 - **FIX**: Aligned the active operation (launch spinner) line flush-left with a single space so it matches the log text on both the server and Flutter tabs.
-- **FIX**: Restyled `AlertLine` copy/dismiss hints to match the command bar (unbracketed, capitalized, command colors).
+- **FIX**: Restyled `AlertLine` copy/dismiss hints to match the command bar (unbracketed, capitalized, command colors) and right-aligned them on the line.
 
 ## 0.6.0
 

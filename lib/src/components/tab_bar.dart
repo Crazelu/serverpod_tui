@@ -14,7 +14,7 @@ enum TabActivity {
   /// static fallback glyph.
   loading,
 
-  /// A square in the theme's failure color.
+  /// An empty circle in the theme's muted color.
   stopped,
 }
 
@@ -108,10 +108,10 @@ class _Tab extends StatelessComponent {
   @override
   Component build(BuildContext context) {
     final theme = ServerpodTheme.of(context);
-    final indicator = _indicator(theme);
+    final hasIndicator = state != TabActivity.none;
     // The indicator and its trailing space occupy two columns, so the
     // selection underline must cover them too.
-    final underlineWidth = label.length + (indicator != null ? 2 : 0);
+    final underlineWidth = label.length + (hasIndicator ? 2 : 0);
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -121,7 +121,10 @@ class _Tab extends StatelessComponent {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (indicator != null) ...[indicator, const Text(' ')],
+              if (hasIndicator) ...[
+                TabActivityIndicator(state),
+                const Text(' '),
+              ],
               Text(
                 label,
                 style: TextStyle(
@@ -142,21 +145,59 @@ class _Tab extends StatelessComponent {
       ),
     );
   }
+}
 
-  /// The leading status indicator for [state], or null for [TabActivity.none].
-  /// The indicator keeps its status colour whether or not the tab is selected,
-  /// so app state stays readable at a glance.
-  Component? _indicator(ServerpodThemeData theme) {
-    switch (state) {
-      case TabActivity.none:
-        return null;
-      case TabActivity.running:
-        return Text('●', style: TextStyle(color: theme.success));
-      case TabActivity.loading:
-        return SpinnerIcon(color: theme.spinner);
-      case TabActivity.stopped:
-        return Text('◼', style: TextStyle(color: theme.failure));
+/// A leading status indicator for a tab or app row.
+///
+/// Renders the glyph for [activity] as a single [Text] so the widget's
+/// component type stays stable across state changes - a type flip in a slot
+/// (e.g. a spinner becoming a static glyph) can leave stale cells behind. The
+/// loading spinner animates off the shared [SpinnerScope] when one is present,
+/// otherwise it shows a static frame. The colour follows the theme regardless
+/// of selection, so app state stays readable at a glance.
+class TabActivityIndicator extends StatefulComponent {
+  const TabActivityIndicator(this.activity, {super.key});
+
+  final TabActivity activity;
+
+  @override
+  State<TabActivityIndicator> createState() => _TabActivityIndicatorState();
+}
+
+class _TabActivityIndicatorState extends State<TabActivityIndicator> {
+  SpinnerNotifier? _notifier;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final notifier = SpinnerScope.of(context);
+    if (notifier != _notifier) {
+      _notifier?.removeListener(_onFrame);
+      _notifier = notifier;
+      _notifier?.addListener(_onFrame);
     }
+  }
+
+  void _onFrame() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _notifier?.removeListener(_onFrame);
+    super.dispose();
+  }
+
+  @override
+  Component build(BuildContext context) {
+    final theme = ServerpodTheme.of(context);
+    final (glyph, color) = switch (component.activity) {
+      TabActivity.none => (' ', null),
+      TabActivity.running => ('●', theme.success),
+      TabActivity.loading => (_notifier?.value ?? '●', theme.spinner),
+      TabActivity.stopped => ('○', theme.debugLevel),
+    };
+    return Text(glyph, style: color == null ? null : TextStyle(color: color));
   }
 }
 

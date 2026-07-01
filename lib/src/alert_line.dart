@@ -69,10 +69,8 @@ class AlertLine extends StatelessComponent {
       fontWeight: FontWeight.bold,
     );
     final labelStyle = TextStyle(color: st.brightText);
-    final separatorStyle = TextStyle(color: st.subtleDivider);
 
     final hints = <(String, TextStyle)>[
-      (' · ', separatorStyle),
       if (code != null) ...[('C', keyStyle), (' Copy  ', labelStyle)],
       ('Esc', keyStyle),
       (' Dismiss', labelStyle),
@@ -102,6 +100,7 @@ class AlertLine extends StatelessComponent {
 
     return [
       ...messageSpans,
+      Expanded(child: const SizedBox.shrink()),
       for (final (text, style) in hints) Text(text, style: style),
     ];
   }
