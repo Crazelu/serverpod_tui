@@ -1,5 +1,22 @@
 import 'package:nocterm/nocterm.dart';
+import 'package:serverpod_tui/src/components/spinner.dart';
 import 'package:serverpod_tui/src/serverpod_theme.dart';
+
+/// Activity state shown as a leading indicator on a tab.
+enum TabActivity {
+  /// No indicator.
+  none,
+
+  /// A dot in the theme's success color.
+  running,
+
+  /// A spinner; animated when a [SpinnerScope] ancestor is present, otherwise a
+  /// static fallback glyph.
+  loading,
+
+  /// An empty circle in the theme's muted color.
+  stopped,
+}
 
 /// A tab bar component.
 class TabBar extends StatelessComponent {
@@ -8,11 +25,16 @@ class TabBar extends StatelessComponent {
     required this.labels,
     required this.selectedTab,
     required this.onTabChanged,
+    this.states = const [],
   });
 
   final List<String> labels;
   final int selectedTab;
   final ValueChanged<int> onTabChanged;
+
+  /// Per-tab activity indicators, aligned by index with [labels]. Indices
+  /// without an entry (or set to [TabActivity.none]) render no indicator.
+  final List<TabActivity> states;
 
   @override
   Component build(BuildContext context) {
@@ -33,6 +55,7 @@ class TabBar extends StatelessComponent {
         _Tab(
           label: labels[i],
           selected: i == selectedTab,
+          state: i < states.length ? states[i] : TabActivity.none,
           onTap: () => onTabChanged(i),
         ),
       );
@@ -73,31 +96,46 @@ class _Tab extends StatelessComponent {
   const _Tab({
     required this.label,
     required this.selected,
+    required this.state,
     required this.onTap,
   });
 
   final String label;
   final bool selected;
+  final TabActivity state;
   final VoidCallback onTap;
 
   @override
   Component build(BuildContext context) {
     final theme = ServerpodTheme.of(context);
+    final hasIndicator = state != TabActivity.none;
+    // The indicator and its trailing space occupy two columns, so the
+    // selection underline must cover them too.
+    final underlineWidth = label.length + (hasIndicator ? 2 : 0);
     return GestureDetector(
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: theme.brightText,
-              fontWeight: selected ? FontWeight.normal : FontWeight.dim,
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (hasIndicator) ...[
+                TabActivityIndicator(state),
+                const Text(' '),
+              ],
+              Text(
+                label,
+                style: TextStyle(
+                  color: theme.brightText,
+                  fontWeight: selected ? FontWeight.normal : FontWeight.dim,
+                ),
+              ),
+            ],
           ),
           Text(
-            ''.padLeft(label.length, '━'),
+            ''.padLeft(underlineWidth, '━'),
             style: TextStyle(
               color: selected ? theme.activationKey : null,
               fontWeight: selected ? FontWeight.normal : FontWeight.dim,
@@ -106,6 +144,60 @@ class _Tab extends StatelessComponent {
         ],
       ),
     );
+  }
+}
+
+/// A leading status indicator for a tab or app row.
+///
+/// Renders the glyph for [activity] as a single [Text] so the widget's
+/// component type stays stable across state changes - a type flip in a slot
+/// (e.g. a spinner becoming a static glyph) can leave stale cells behind. The
+/// loading spinner animates off the shared [SpinnerScope] when one is present,
+/// otherwise it shows a static frame. The colour follows the theme regardless
+/// of selection, so app state stays readable at a glance.
+class TabActivityIndicator extends StatefulComponent {
+  const TabActivityIndicator(this.activity, {super.key});
+
+  final TabActivity activity;
+
+  @override
+  State<TabActivityIndicator> createState() => _TabActivityIndicatorState();
+}
+
+class _TabActivityIndicatorState extends State<TabActivityIndicator> {
+  SpinnerNotifier? _notifier;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final notifier = SpinnerScope.of(context);
+    if (notifier != _notifier) {
+      _notifier?.removeListener(_onFrame);
+      _notifier = notifier;
+      _notifier?.addListener(_onFrame);
+    }
+  }
+
+  void _onFrame() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _notifier?.removeListener(_onFrame);
+    super.dispose();
+  }
+
+  @override
+  Component build(BuildContext context) {
+    final theme = ServerpodTheme.of(context);
+    final (glyph, color) = switch (component.activity) {
+      TabActivity.none => (' ', null),
+      TabActivity.running => ('●', theme.success),
+      TabActivity.loading => (_notifier?.value ?? '●', theme.spinner),
+      TabActivity.stopped => ('○', theme.debugLevel),
+    };
+    return Text(glyph, style: color == null ? null : TextStyle(color: color));
   }
 }
 

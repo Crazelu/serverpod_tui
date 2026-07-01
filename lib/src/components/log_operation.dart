@@ -116,10 +116,8 @@ class TrackedOperationWidget extends StatelessComponent {
 
     return Row(
       children: [
-        const Text('  '),
         SpinnerIcon(color: st.spinner),
-        const Text('  '),
-        const SizedBox(width: 14),
+        const Text(' '),
         Expanded(child: Text('${operation.label}...')),
       ],
     );
