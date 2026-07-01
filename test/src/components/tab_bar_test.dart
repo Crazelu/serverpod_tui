@@ -41,14 +41,17 @@ void main() {
       expect(text, contains('● app'));
     });
 
-    test('when a tab is stopped then an empty circle precedes its label', () async {
-      final text = await _render(
-        ['Server logs', 'app'],
-        [TabActivity.none, TabActivity.stopped],
-      );
+    test(
+      'when a tab is stopped then an empty circle precedes its label',
+      () async {
+        final text = await _render(
+          ['Server logs', 'app'],
+          [TabActivity.none, TabActivity.stopped],
+        );
 
-      expect(text, contains('○ app'));
-    });
+        expect(text, contains('○ app'));
+      },
+    );
 
     test('when a tab is loading then a spinner precedes its label', () async {
       final text = await _render(
