@@ -96,14 +96,17 @@ void main() {
         expect(state.alertCopied, isFalse);
       });
 
-      test('when the alert is dismissed then the confirmation clears', () async {
-        await _sendKey(tester, LogicalKey.keyC);
-        expect(state.alertCopied, isTrue);
+      test(
+        'when the alert is dismissed then the confirmation clears',
+        () async {
+          await _sendKey(tester, LogicalKey.keyC);
+          expect(state.alertCopied, isTrue);
 
-        await _sendKey(tester, LogicalKey.escape);
+          await _sendKey(tester, LogicalKey.escape);
 
-        expect(state.alertCopied, isFalse);
-      });
+          expect(state.alertCopied, isFalse);
+        },
+      );
     },
   );
 
