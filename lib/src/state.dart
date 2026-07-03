@@ -29,6 +29,10 @@ abstract class TuiState {
 
   /// When [alert] was raised, shown alongside it. Null when unknown.
   DateTime? alertTime;
+
+  /// True briefly after the alert's segment is copied, so `AlertLine` can show
+  /// a `✓ Copied` confirmation in place of the `C Copy` hint.
+  bool alertCopied = false;
 }
 
 /// A tracked operation (server session or CLI progress).

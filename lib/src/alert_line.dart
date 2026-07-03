@@ -13,13 +13,30 @@ final _timeFormat = DateFormat('HH:mm:ss.SSS');
 /// fit, so the line never wraps. Place it where it should appear - e.g. pinned
 /// at the bottom of a log panel.
 class AlertLine extends StatelessComponent {
-  const AlertLine({super.key, required this.alert, this.time});
+  const AlertLine({
+    super.key,
+    required this.alert,
+    required this.onCopy,
+    required this.onDismiss,
+    this.time,
+    this.copied = false,
+  });
 
   final AlertMessage alert;
 
   /// When the alert was raised; rendered in the same column as log timestamps.
   /// Omitted when null.
   final DateTime? time;
+
+  /// When true, the copy hint shows a `✓ Copied` confirmation instead of
+  /// `C Copy`.
+  final bool copied;
+
+  /// Invoked when the copy hint is clicked.
+  final VoidCallback onCopy;
+
+  /// Invoked when the dismiss hint is clicked.
+  final VoidCallback onDismiss;
 
   @override
   Component build(BuildContext context) {
@@ -69,13 +86,26 @@ class AlertLine extends StatelessComponent {
       fontWeight: FontWeight.bold,
     );
     final labelStyle = TextStyle(color: st.brightText);
+    final copiedStyle = TextStyle(
+      color: st.success,
+      fontWeight: FontWeight.bold,
+    );
 
-    final hints = <(String, TextStyle)>[
-      if (code != null) ...[('C', keyStyle), (' Copy  ', labelStyle)],
-      ('Esc', keyStyle),
-      (' Dismiss', labelStyle),
+    // Each hint is a run of styled spans plus its tap handler, rendered as one
+    // clickable group. Trailing spaces after Copy separate it from Dismiss. The
+    // copy hint becomes `✓ Copied` (matching the log's green success mark) for
+    // a moment after a copy.
+    final copyHint = copied
+        ? [('✓', copiedStyle), (' Copied  ', labelStyle)]
+        : [('C', keyStyle), (' Copy  ', labelStyle)];
+    final hints = <(List<(String, TextStyle)>, VoidCallback)>[
+      if (code != null) (copyHint, onCopy),
+      ([('Esc', keyStyle), (' Dismiss', labelStyle)], onDismiss),
     ];
-    final hintsWidth = hints.fold<int>(0, (w, h) => w + h.$1.length);
+    final hintsWidth = hints.fold<int>(
+      0,
+      (w, hint) => w + hint.$1.fold<int>(0, (w, span) => w + span.$1.length),
+    );
 
     final message = _truncateKeepingTail(
       alert.displayText,
@@ -101,8 +131,20 @@ class AlertLine extends StatelessComponent {
     return [
       ...messageSpans,
       Expanded(child: const SizedBox.shrink()),
-      for (final (text, style) in hints) Text(text, style: style),
+      for (final (spans, onTap) in hints) _hint(spans, onTap),
     ];
+  }
+
+  /// Renders one hint group as a clickable [GestureDetector]. [MainAxisSize.min]
+  /// keeps the hit area to the text so only that hint responds to a tap.
+  Component _hint(List<(String, TextStyle)> spans, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [for (final (text, style) in spans) Text(text, style: style)],
+      ),
+    );
   }
 
   /// Truncates [text] to [width] columns, keeping the tail and prefixing an
