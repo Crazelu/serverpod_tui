@@ -60,6 +60,7 @@ abstract class TuiAppStateHolder<S extends TuiState> {
   void showAlert(AlertMessage alert, {DateTime? time}) {
     state.alert = alert;
     state.alertTime = time;
+    state.alertCopied = false;
     if (alert.copyText case final text?) {
       copyToClipboard(text);
     }

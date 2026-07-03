@@ -23,9 +23,13 @@ abstract class TuiAppState<S extends TuiApp> extends State<S> {
   /// How long after a first Ctrl-C a second press still counts as "exit".
   static const _exitArmWindow = Duration(seconds: 2);
 
+  /// How long the `✓ Copied` confirmation replaces the alert's copy hint.
+  static const _copiedWindow = Duration(seconds: 2);
+
   bool _exitArmed = false;
   Timer? _exitArmTimer;
   Timer? _hintClearTimer;
+  Timer? _alertCopiedTimer;
 
   @override
   void initState() {
@@ -43,6 +47,7 @@ abstract class TuiAppState<S extends TuiApp> extends State<S> {
   void dispose() {
     _exitArmTimer?.cancel();
     _hintClearTimer?.cancel();
+    _alertCopiedTimer?.cancel();
     component.holder.detach(this);
     super.dispose();
   }
@@ -121,7 +126,26 @@ abstract class TuiAppState<S extends TuiApp> extends State<S> {
     final state = component.holder.state;
     state.alert = null;
     state.alertTime = null;
+    state.alertCopied = false;
+    _alertCopiedTimer?.cancel();
     rebuild();
+  }
+
+  /// Copies the current alert's segment (re-copying in case the clipboard has
+  /// been overwritten since the alert appeared) and shows a `✓ Copied`
+  /// confirmation on the alert line for [_copiedWindow]. No-op without a
+  /// copyable segment.
+  void copyAlert() {
+    if (component.holder.state.alert?.copyText case final text?) {
+      copyToClipboard(text);
+      component.holder.state.alertCopied = true;
+      _alertCopiedTimer?.cancel();
+      _alertCopiedTimer = Timer(_copiedWindow, () {
+        component.holder.state.alertCopied = false;
+        rebuild();
+      });
+      rebuild();
+    }
   }
 
   bool _handleKeyEvent(KeyboardEvent event) {
@@ -129,8 +153,7 @@ abstract class TuiAppState<S extends TuiApp> extends State<S> {
     return _handleAlertKeys(event);
   }
 
-  // Escape dismisses the alert; C re-copies its segment in case the clipboard
-  // has been overwritten since the alert appeared.
+  // Escape dismisses the alert; C re-copies its segment.
   bool _handleAlertKeys(KeyboardEvent event) {
     final alert = component.holder.state.alert;
     if (alert == null) return false;
@@ -140,13 +163,12 @@ abstract class TuiAppState<S extends TuiApp> extends State<S> {
       return true;
     }
 
-    if (alert.copyText case final text?
-        when event.logicalKey == LogicalKey.keyC &&
-            !event.isControlPressed &&
-            !event.isAltPressed &&
-            !event.isMetaPressed) {
-      copyToClipboard(text);
-      _showHint('Copied to clipboard', autoClear: true);
+    if (alert.copyText != null &&
+        event.logicalKey == LogicalKey.keyC &&
+        !event.isControlPressed &&
+        !event.isAltPressed &&
+        !event.isMetaPressed) {
+      copyAlert();
       return true;
     }
 

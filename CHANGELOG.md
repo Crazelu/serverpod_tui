@@ -1,3 +1,9 @@
+## 0.8.0
+
+- **FEAT**: `AlertLine` copy/dismiss hints are now clickable.
+- **FEAT**: Copying an alert's segment now shows an inline green `✓ Copied` confirmation (matching the log's success mark) in place of the `C Copy` hint for a couple of seconds, instead of appending a `Copied to clipboard` line that displaced the content below it.
+- **BREAKING**: `AlertLine` now requires `onCopy` and `onDismiss` callbacks and takes an optional `copied` flag.
+
 ## 0.7.0
 
 - **FEAT**: Added per-tab status indicators to `TabBar` via a new `TabActivity` enum and `states` parameter, plus a reusable `TabActivityIndicator` widget: running (`●`), loading (spinner), stopped (`○`).

@@ -10,11 +10,18 @@ Future<String> _render(
   String message, {
   required int width,
   DateTime? time,
+  bool copied = false,
 }) async {
   final tester = await NoctermTester.create(size: Size(width.toDouble(), 6));
   try {
     await tester.pumpComponent(
-      AlertLine(alert: AlertMessage.parse(message), time: time),
+      AlertLine(
+        alert: AlertMessage.parse(message),
+        time: time,
+        copied: copied,
+        onCopy: () {},
+        onDismiss: () {},
+      ),
     );
     return tester.terminalState
         .getText()
@@ -71,6 +78,31 @@ void main() {
       expect(line, startsWith('alert Registration code:'));
     },
   );
+
+  group('Given an alert whose code was just copied', () {
+    late String line;
+
+    setUp(() async {
+      line = await _render(
+        'Registration code: <h2k9x3mp>',
+        width: 80,
+        time: _time,
+        copied: true,
+      );
+    });
+
+    test('when rendered then the copy hint shows a copied confirmation', () {
+      expect(line, contains('✓ Copied'));
+    });
+
+    test('when rendered then the plain copy hint is gone', () {
+      expect(line, isNot(contains('C Copy')));
+    });
+
+    test('when rendered then the dismiss hint still shows', () {
+      expect(line, contains('Dismiss'));
+    });
+  });
 
   group('Given an alert without a code', () {
     late String line;

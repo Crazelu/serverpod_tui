@@ -74,11 +74,39 @@ void main() {
         expect(ClipboardManager.paste(), 'h2k9x3mp');
       });
 
-      test('when C is pressed then a confirmation hint is shown', () async {
+      test('when C is pressed then the copied confirmation is shown', () async {
         await _sendKey(tester, LogicalKey.keyC);
 
-        expect(state.ctrlCHint, 'Copied to clipboard');
+        expect(state.alertCopied, isTrue);
       });
+
+      test('when C is pressed then no bottom hint line is shown', () async {
+        await _sendKey(tester, LogicalKey.keyC);
+
+        expect(state.ctrlCHint, isNull);
+      });
+
+      test('when the confirmation window elapses then it clears', () async {
+        await _sendKey(tester, LogicalKey.keyC);
+        expect(state.alertCopied, isTrue);
+
+        // Just past the 2s confirmation window.
+        await tester.pump(const Duration(milliseconds: 2200));
+
+        expect(state.alertCopied, isFalse);
+      });
+
+      test(
+        'when the alert is dismissed then the confirmation clears',
+        () async {
+          await _sendKey(tester, LogicalKey.keyC);
+          expect(state.alertCopied, isTrue);
+
+          await _sendKey(tester, LogicalKey.escape);
+
+          expect(state.alertCopied, isFalse);
+        },
+      );
     },
   );
 
@@ -94,11 +122,12 @@ void main() {
     });
 
     test(
-      'when C is pressed then nothing is copied and no hint appears',
+      'when C is pressed then nothing is copied and no confirmation appears',
       () async {
         await _sendKey(tester, LogicalKey.keyC);
 
         expect(ClipboardManager.paste(), 'previous clipboard content');
+        expect(state.alertCopied, isFalse);
         expect(state.ctrlCHint, isNull);
       },
     );
