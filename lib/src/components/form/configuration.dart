@@ -1,6 +1,7 @@
 import 'package:nocterm/nocterm.dart';
 import 'package:serverpod_tui/src/components/checkbox.dart';
 import 'package:serverpod_tui/src/components/radio_button.dart';
+import 'package:serverpod_tui/src/components/text.dart';
 import 'package:serverpod_tui/src/components/wrap.dart';
 import 'package:serverpod_tui/src/form/config.dart';
 import 'package:serverpod_tui/src/form/config_option.dart';
@@ -34,7 +35,7 @@ class FormConfigurationLayout extends StatelessComponent {
         child,
         if (config.description case final FormDescription description) ...[
           SizedBox(height: description.spacing),
-          Text(
+          ServerpodTuiText(
             description.label,
             style: const TextStyle(
               color: Color.defaultColor,

@@ -22,6 +22,7 @@ class MultiScreenForm extends Form {
     this.nextButtonActivationKey = LogicalKey.space,
     super.onSubmit,
     this.summaryDescription,
+    this.submitButtonLabel,
   }) : super(state: state);
 
   /// State for multi screen form.
@@ -36,6 +37,10 @@ class MultiScreenForm extends Form {
   /// Optional description for the summary screen.
   final String? summaryDescription;
 
+  /// Optional label for the summary screen action button.
+  /// Defaults to 'Submit' when not provided.
+  final String? submitButtonLabel;
+
   @override
   Component build(BuildContext context) {
     if (state.isSummary) {
@@ -45,12 +50,14 @@ class MultiScreenForm extends Form {
         padding: padding,
         description: summaryDescription,
         scrollController: scrollController,
+        onSubmit: onSubmit,
+        backButtonActivationKey: backButtonActivationKey,
+        nextButtonActivationKey: nextButtonActivationKey,
+        submitButtonLabel: submitButtonLabel,
       );
     }
 
     final config = state.configurations[state.currentScreenIndex];
-    final showMultiScreenNavigationButtons =
-        !state.isSummary && !state.hasSingleScreen;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -82,13 +89,14 @@ class MultiScreenForm extends Form {
             ),
           ),
         ),
-        if (showMultiScreenNavigationButtons)
-          _MultiScreenNavigationButtons(
-            state: state,
-            rebuild: rebuild,
-            backButtonActivationKey: backButtonActivationKey,
-            nextButtonActivationKey: nextButtonActivationKey,
-          ),
+        _MultiScreenNavigationButtons(
+          state: state,
+          rebuild: rebuild,
+          backButtonActivationKey: backButtonActivationKey,
+          nextButtonActivationKey: nextButtonActivationKey,
+          onSubmit: onSubmit,
+          submitButtonLabel: submitButtonLabel,
+        ),
       ],
     );
   }
@@ -100,38 +108,51 @@ class _MultiScreenNavigationButtons extends StatelessComponent {
     required this.rebuild,
     required this.backButtonActivationKey,
     required this.nextButtonActivationKey,
+    this.onSubmit,
+    this.submitButtonLabel,
   });
 
   final MultiScreenFormState state;
   final VoidCallback rebuild;
   final LogicalKey backButtonActivationKey;
   final LogicalKey nextButtonActivationKey;
+  final VoidCallback? onSubmit;
+
+  /// Label for the button to submit the form.
+  /// Defaults to 'Submit'.
+  final String? submitButtonLabel;
 
   @override
   Component build(BuildContext context) {
     final isFirstScreen = state.currentScreenIndex == 0;
+    final onLastScreen = state.hasSingleScreen || state.isSummary;
 
     return Align(
       alignment: Alignment.bottomRight,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (!isFirstScreen) ...[
+            TextButton(
+              name: 'Back',
+              activationKeys: [backButtonActivationKey],
+              onActivate: (_) {
+                state.previousScreen();
+                rebuild();
+              },
+              focused: state.focusOnButton && state.focusedButtonIndex == 0,
+            ),
+            const SizedBox(width: 1),
+          ],
           TextButton(
-            name: 'Back',
-            activationKeys: [backButtonActivationKey],
-            onActivate: (_) {
-              state.previousScreen();
-              rebuild();
-            },
-            enabled: !isFirstScreen,
-            focused: state.focusOnButton && state.focusedButtonIndex == 0,
-          ),
-          const SizedBox(width: 1),
-          TextButton(
-            name: 'Next',
+            name: onLastScreen ? submitButtonLabel ?? 'Submit' : 'Next',
             activationKeys: [nextButtonActivationKey],
             onActivate: (_) {
-              state.nextScreen();
+              if (onLastScreen) {
+                onSubmit?.call();
+              } else {
+                state.nextScreen();
+              }
               rebuild();
             },
             focused: state.focusOnButton && state.focusedButtonIndex == 1,
@@ -150,6 +171,10 @@ class _SummaryScreen extends StatelessComponent {
     required this.padding,
     required this.scrollController,
     this.description,
+    this.onSubmit,
+    this.backButtonActivationKey = LogicalKey.space,
+    this.nextButtonActivationKey = LogicalKey.space,
+    this.submitButtonLabel,
   });
 
   final MultiScreenFormState state;
@@ -157,6 +182,10 @@ class _SummaryScreen extends StatelessComponent {
   final EdgeInsets padding;
   final ScrollController scrollController;
   final String? description;
+  final VoidCallback? onSubmit;
+  final LogicalKey backButtonActivationKey;
+  final LogicalKey nextButtonActivationKey;
+  final String? submitButtonLabel;
 
   @override
   Component build(BuildContext context) {
@@ -193,6 +222,14 @@ class _SummaryScreen extends StatelessComponent {
               ),
             ),
           ),
+        ),
+        _MultiScreenNavigationButtons(
+          state: state,
+          rebuild: rebuild,
+          backButtonActivationKey: backButtonActivationKey,
+          nextButtonActivationKey: nextButtonActivationKey,
+          onSubmit: onSubmit,
+          submitButtonLabel: submitButtonLabel,
         ),
       ],
     );

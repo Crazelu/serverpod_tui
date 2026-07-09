@@ -14,6 +14,7 @@ export 'src/components/radio_button.dart';
 export 'src/components/shimmer.dart';
 export 'src/components/spinner.dart';
 export 'src/components/tab_bar.dart';
+export 'src/components/text.dart';
 export 'src/components/tip.dart';
 export 'src/components/unconstrained_box.dart';
 export 'src/components/wrap.dart';

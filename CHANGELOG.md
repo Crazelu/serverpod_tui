@@ -1,3 +1,9 @@
+## 0.9.0
+
+- **FEAT**: Added submit button to multi screen form.
+- **FEAT**: Added `ServerpodTuiText` to render multi line texts without leading and trailing whitespace after the first line.
+- **FIX**: Removed leading and trailing whitespace from multi line form description text.
+
 ## 0.8.0
 
 - **FEAT**: `AlertLine` copy/dismiss hints are now clickable.

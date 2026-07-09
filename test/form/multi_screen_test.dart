@@ -91,7 +91,14 @@ class _MultiScreenTestHolder extends TuiAppStateHolder<_MultiScreenTestState> {
 }
 
 class _MultiScreenTestApp extends TuiApp<_MultiScreenTestHolder> {
-  const _MultiScreenTestApp({required super.holder});
+  const _MultiScreenTestApp({
+    required super.holder,
+    this.submitButtonLabel,
+    this.onSubmit,
+  });
+
+  final String? submitButtonLabel;
+  final VoidCallback? onSubmit;
 
   @override
   TuiAppState<_MultiScreenTestApp> createState() => _MultiScreenTestAppState();
@@ -135,6 +142,9 @@ class _MultiScreenTestAppState extends TuiAppState<_MultiScreenTestApp> {
             component.holder.markDirty();
             return true;
           case LogicalKey.space:
+            if (formState.focusOnButton && formState.focusedButtonIndex == 1) {
+              return false;
+            }
             formState.onSelect();
             component.holder.markDirty();
             return true;
@@ -153,6 +163,8 @@ class _MultiScreenTestAppState extends TuiAppState<_MultiScreenTestApp> {
         state: formState,
         scrollController: _scrollController,
         rebuild: component.holder.markDirty,
+        submitButtonLabel: component.submitButtonLabel,
+        onSubmit: component.onSubmit,
       ),
     );
   }
@@ -200,6 +212,33 @@ void main() {
         await _pump(tester);
 
         expect(state.currentScreenIndex, 1);
+      },
+    );
+
+    test(
+      'when on the first screen, '
+      'then only the Next button is shown',
+      () async {
+        await _pump(tester);
+
+        final screenText = tester.terminalState.getText();
+        expect(screenText, isNot(contains('Back')));
+        expect(screenText, contains('Next'));
+      },
+    );
+
+    test(
+      'when on non-first screen, '
+      'then the Back and Next buttons are shown',
+      () async {
+        await _pump(tester);
+
+        await _sendKey(tester, LogicalKey.enter);
+        await _pump(tester);
+
+        final screenText = tester.terminalState.getText();
+        expect(screenText, contains('Back'));
+        expect(screenText, contains('Next'));
       },
     );
 
@@ -318,6 +357,21 @@ void main() {
         expect(state.isSummary, isFalse);
       },
     );
+
+    test(
+      'when on the summary screen and no submitButtonLabel is provided, '
+      'then the action button shows "Submit"',
+      () async {
+        for (var i = 0; i < state.configScreenCount; i++) {
+          await _sendKey(tester, LogicalKey.enter);
+          await _pump(tester);
+        }
+        expect(state.isSummary, isTrue);
+
+        final screenText = tester.terminalState.getText();
+        expect(screenText, contains('Submit'));
+      },
+    );
   });
 
   group('Given a multi-screen form with a single config', () {
@@ -345,12 +399,16 @@ void main() {
 
     test(
       'when arrowDown is pressed, '
-      'then the buttons are not focused',
+      'then the Submit button is shown and focused',
       () async {
         await _sendKey(tester, LogicalKey.arrowDown);
         await _pump(tester);
 
-        expect(state.focusOnButton, isFalse);
+        final screenText = tester.terminalState.getText();
+        expect(screenText, isNot(contains('Back')));
+        expect(screenText, contains('Submit'));
+
+        expect(state.focusOnButton, isTrue);
         expect(state.currentScreenIndex, 0);
       },
     );
@@ -376,6 +434,141 @@ void main() {
 
         expect(state.currentScreenIndex, 0);
         expect(state.isSummary, isFalse);
+      },
+    );
+  });
+
+  group('Given a multi-screen form with a custom submitButtonLabel', () {
+    late NoctermTester tester;
+    late MultiScreenFormState state;
+    late _MultiScreenTestHolder holder;
+
+    setUp(() async {
+      state = MultiScreenFormState(SimpleConfig.values);
+      holder = _MultiScreenTestHolder(_MultiScreenTestState(state));
+      tester = await NoctermTester.create(size: const Size(80, 24));
+      await tester.pumpComponent(
+        _MultiScreenTestApp(holder: holder, submitButtonLabel: 'Create'),
+      );
+    });
+
+    tearDown(() async {
+      tester.dispose();
+      await holder.dispose();
+    });
+
+    test(
+      'when on the summary screen, '
+      'then the action button shows the custom label',
+      () async {
+        for (var i = 0; i < state.configScreenCount; i++) {
+          await _sendKey(tester, LogicalKey.enter);
+          await _pump(tester);
+        }
+        expect(state.isSummary, isTrue);
+
+        final screenText = tester.terminalState.getText();
+        expect(screenText, contains('Create'));
+      },
+    );
+  });
+
+  group('Given a multi-screen form with multiple configs and onSubmit', () {
+    late NoctermTester tester;
+    late MultiScreenFormState state;
+    late _MultiScreenTestHolder holder;
+    var onSubmitCalled = false;
+
+    setUp(() async {
+      onSubmitCalled = false;
+      state = MultiScreenFormState(SimpleConfig.values);
+      holder = _MultiScreenTestHolder(_MultiScreenTestState(state));
+      tester = await NoctermTester.create(size: const Size(80, 24));
+      await tester.pumpComponent(
+        _MultiScreenTestApp(
+          holder: holder,
+          onSubmit: () => onSubmitCalled = true,
+        ),
+      );
+    });
+
+    tearDown(() async {
+      tester.dispose();
+      await holder.dispose();
+    });
+
+    test(
+      'when on the summary screen and Space activates the submit button, '
+      'then onSubmit is called',
+      () async {
+        // Navigate to summary
+        for (var i = 0; i < state.configScreenCount; i++) {
+          await _sendKey(tester, LogicalKey.enter);
+          await _pump(tester);
+        }
+        expect(state.isSummary, isTrue);
+        expect(onSubmitCalled, isFalse);
+
+        // Focus on Back button, then move to submit button
+        await _sendKey(tester, LogicalKey.arrowDown);
+        await _pump(tester);
+        await _sendKey(tester, LogicalKey.arrowRight);
+        await _pump(tester);
+        expect(state.focusOnButton, isTrue);
+        expect(state.focusedButtonIndex, 1);
+        expect(onSubmitCalled, isFalse);
+
+        // Space to activate the submit button
+        await _sendKey(tester, LogicalKey.space);
+        await _pump(tester);
+
+        expect(onSubmitCalled, isTrue);
+      },
+    );
+  });
+
+  group('Given a multi-screen form with a single config and onSubmit', () {
+    late NoctermTester tester;
+    late MultiScreenFormState state;
+    late _MultiScreenTestHolder holder;
+    var onSubmitCalled = false;
+
+    setUp(() async {
+      onSubmitCalled = false;
+      state = MultiScreenFormState([SimpleConfig.database]);
+      holder = _MultiScreenTestHolder(_MultiScreenTestState(state));
+      tester = await NoctermTester.create(size: const Size(80, 24));
+      await tester.pumpComponent(
+        _MultiScreenTestApp(
+          holder: holder,
+          onSubmit: () => onSubmitCalled = true,
+        ),
+      );
+    });
+
+    tearDown(() async {
+      tester.dispose();
+      await holder.dispose();
+    });
+
+    test(
+      'when on the first screen and Space activates the submit button, '
+      'then onSubmit is called',
+      () async {
+        // Navigate to the summary screen (hasSingleScreen: Enter does nothing,
+        // but we use arrowDown to focus the submit button)
+        await _sendKey(tester, LogicalKey.arrowDown);
+        await _pump(tester);
+        expect(state.focusOnButton, isTrue);
+        expect(state.focusedButtonIndex, 1);
+        expect(state.currentScreenIndex, 0);
+        expect(onSubmitCalled, isFalse);
+
+        // Space to activate the submit button via the outer handler
+        await _sendKey(tester, LogicalKey.space);
+        await _pump(tester);
+
+        expect(onSubmitCalled, isTrue);
       },
     );
   });
