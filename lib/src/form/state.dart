@@ -287,7 +287,7 @@ class MultiScreenFormState extends FormState {
   /// then the focus is moved to the buttons.
   @override
   void focusDown() {
-    if (!_focusOnButton && !hasSingleScreen) {
+    if (!_focusOnButton) {
       if (isSummary || _currentScreenIndex > 0) {
         focusBackButton();
       } else if (!isSummary) {
@@ -301,7 +301,7 @@ class MultiScreenFormState extends FormState {
   /// then the focus is moved to the form.
   @override
   void focusUp() {
-    if (_focusOnButton && !hasSingleScreen) {
+    if (_focusOnButton) {
       _focusOnButton = false;
       if (_currentScreenIndex < configurations.length) {
         final config = configurations[_currentScreenIndex];
@@ -319,7 +319,7 @@ class MultiScreenFormState extends FormState {
   @override
   void focusRight() {
     if (_focusOnButton) {
-      if (_focusedButtonIndex == 0 && !isSummary) {
+      if (_focusedButtonIndex == 0) {
         focusNextButton();
       }
     } else if (_currentScreenIndex < configurations.length) {
@@ -395,6 +395,9 @@ class MultiScreenFormState extends FormState {
       if (currentFocus > 0) {
         updateFocusedConfigOption(-currentFocus);
       }
+    } else {
+      // Focus action buttons on summary screen.
+      focusDown();
     }
   }
 }

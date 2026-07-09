@@ -1,3 +1,7 @@
+## 0.9.0
+
+- **FEAT**: Added submit button to multi screen form.
+
 ## 0.8.0
 
 - **FEAT**: `AlertLine` copy/dismiss hints are now clickable.

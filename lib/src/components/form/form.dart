@@ -30,6 +30,7 @@ class Form extends StatelessComponent {
     LogicalKey nextButtonActivationKey,
     VoidCallback? onSubmit,
     String? summaryDescription,
+    String? submitButtonLabel,
   }) = MultiScreenForm;
 
   final FormState state;
