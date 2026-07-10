@@ -1,3 +1,7 @@
+## 0.10.0
+
+- **BREAKING**: `ServerpodTerminalBackend`'s `preExit` now requires `exitCode`.
+
 ## 0.9.0
 
 - **FEAT**: Added submit button to multi screen form.
