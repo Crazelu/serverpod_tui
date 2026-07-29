@@ -1,4 +1,4 @@
-## 0.11.0
+## 0.10.1
 
 - **FEAT**: Multi screen forms now auto-focus `Next` button on the summary screen to prioritise form submission.
 
