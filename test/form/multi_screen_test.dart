@@ -318,7 +318,7 @@ void main() {
 
     test(
       'when navigating through all screens, '
-      'then the summary screen is reached',
+      'then the summary screen is reached and the Next button is focused',
       () async {
         final configCount = state.configScreenCount;
 
@@ -331,6 +331,7 @@ void main() {
 
         expect(state.isSummary, isTrue);
         expect(state.currentScreenIndex, configCount);
+        expect(state.focusedButtonIndex, 1);
       },
     );
 
@@ -347,6 +348,7 @@ void main() {
 
         // Focus on buttons
         await _sendKey(tester, LogicalKey.arrowDown);
+        await _sendKey(tester, LogicalKey.arrowLeft);
         await _pump(tester);
 
         // Space to press back button

@@ -396,8 +396,8 @@ class MultiScreenFormState extends FormState {
         updateFocusedConfigOption(-currentFocus);
       }
     } else {
-      // Focus action buttons on summary screen.
-      focusDown();
+      // Focus action button on summary screen.
+      focusNextButton();
     }
   }
 }

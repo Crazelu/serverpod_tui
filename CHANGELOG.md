@@ -1,3 +1,7 @@
+## 0.11.0
+
+- **FEAT**: Multi screen forms now auto-focus `Next` button on the summary screen to prioritize form submission.
+
 ## 0.10.0
 
 - **BREAKING**: `ServerpodTerminalBackend`'s `preExit` now requires `exitCode`.
