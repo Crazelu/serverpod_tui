@@ -1,3 +1,7 @@
+## 0.11.0
+
+- **FEAT**: Upgrade to nocterm 0.9.0. Borders and dividers now merge into junction characters (`├ ┤ ┬ ┴ ┼`) where they meet, so `BorderedBox` and dividers join seamlessly instead of leaving gaps.
+
 ## 0.10.2
 
 - **FIX**: Restore cursor when quiting TUI on iTerm.
